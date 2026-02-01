@@ -1,8 +1,5 @@
 const url = 'https://graphql.anilist.co';
 
-/**
- * Busca todas as listas do usuário e separa por status
- */
 async function obterListasUsuario(userName) {
     const query = `
     query ($userName: String) {
@@ -47,12 +44,10 @@ async function obterListasUsuario(userName) {
     }
 }
 
-/**
- * Função principal de busca com suporte ao novo filtro de origem
- */
+
 export async function buscarAnime(genero, scoreMin, scoreMax) {
     const usuario = document.getElementById('user-filter').value.trim();
-    const origem = document.getElementById('source-filter')?.value || 'all'; // Pega o novo select
+    const origem = document.getElementById('source-filter')?.value || 'all';
     
     let includeIds = undefined;
     let excludeIds = undefined;
@@ -62,19 +57,19 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
         if (listas === null) return null;
 
         if (origem === "PLANNING") {
-            // Se quer Planning, forçamos a busca apenas nesses IDs
+           
             if (listas.planning.length === 0) {
                 window.openModal("Lista Vazia", "Sua lista de 'Planning' (Planejando) está vazia no AniList.");
                 return null;
             }
             includeIds = listas.planning;
         } else {
-            // Se quer Geral, apenas excluímos o que já está na lista dele (Vistos/Planning/etc)
+            
             excludeIds = listas.todos;
         }
     }
 
-    // Query atualizada para suportar inclusão específica (id_in)
+    
     const query = `
     query ($genre: String, $min: Int, $max: Int, $in: [Int], $notIn: [Int]) {
       Page(page: 1, perPage: 50) {
@@ -93,8 +88,8 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
         genre: genero || undefined,
         min: parseInt(scoreMin) * 10,
         max: parseInt(scoreMax) * 10,
-        in: includeIds,    // Se definido, sorteia APENAS entre esses
-        notIn: excludeIds  // Se definido, ignora esses
+        in: includeIds,
+        notIn: excludeIds
     };
 
     try {
@@ -113,20 +108,39 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
 
 export function atualizarInterface(anime) {
     if (!anime) return;
+
     const resultCard = document.getElementById('result-card');
-    const animeImg = document.getElementById('anime-img');
     const animeTitle = document.getElementById('anime-title');
     const animeDesc = document.getElementById('anime-desc');
     const animeScore = document.getElementById('anime-score');
     const anilistLink = document.getElementById('anilist-link');
+    const imgTag = document.getElementById('anime-img-tag');
 
-    animeImg.style.backgroundImage = `url('${anime.coverImage.extraLarge}')`;
-    animeTitle.innerText = anime.title.romaji;
-    animeScore.innerText = (anime.averageScore / 10).toFixed(1);
-    animeDesc.innerText = anime.description ? anime.description.replace(/<[^>]*>?/gm, '') : "Sem descrição.";
+    if (imgTag && anime.coverImage) {
+        const capa = anime.coverImage.extraLarge || anime.coverImage.large;
+        imgTag.src = capa;
+        imgTag.style.display = 'block';
+    }
 
-    anilistLink.onclick = () => window.open(anime.siteUrl, '_blank');
+    if (animeTitle) animeTitle.innerText = anime.title.romaji;
+    if (animeScore) animeScore.innerText = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : "0.0";
+    
+    if (animeDesc) {
+        animeDesc.innerText = anime.description ? anime.description.replace(/<[^>]*>?/gm, '') : "Sem descrição.";
+        animeDesc.scrollTop = 0; 
+    }
 
-    resultCard.classList.remove('opacity-0', 'translate-y-10');
-    resultCard.classList.add('opacity-100', 'translate-y-0', 'animate-glow');
+    if (anilistLink) {
+        anilistLink.onclick = () => window.open(anime.siteUrl, '_blank');
+    }
+
+    if (resultCard) {
+        resultCard.classList.remove('hidden');
+        resultCard.style.display = 'flex'; 
+        
+        setTimeout(() => {
+            resultCard.classList.remove('opacity-0', 'translate-y-10');
+            resultCard.classList.add('opacity-100', 'translate-y-0', 'animate-glow');
+        }, 50);
+    }
 }
