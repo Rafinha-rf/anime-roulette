@@ -76,6 +76,18 @@
             transition: filter 0.5s ease;
         }
 
+        @media (min-width: 640px) {
+            #result-card {
+                max-height: none !important;
+                height: auto !important;
+            }
+            
+            #anime-desc {
+                max-height: none !important;
+                overflow-y: visible !important;
+            }
+        }
+
         #anime-desc {
             display: block !important;
             max-height: 150px !important; 
@@ -194,7 +206,7 @@
             <div id="result-card"
                 class="glassmorphism rounded-3xl w-full flex flex-col overflow-hidden shadow-2xl border-white/5 opacity-0 transition-all duration-700 translate-y-10 hidden max-h-[85vh]">
                 
-               <div class="relative w-full h-80 sm:h-1/2 shrink-0 overflow-hidden bg-card-dark">
+               <div class="relative w-full h-80 sm:h-[400px] shrink-0 overflow-hidden bg-card-dark">
                     <img id="anime-img-tag" 
                         src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" 
                         class="absolute inset-0 w-full h-full object-cover z-0">

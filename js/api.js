@@ -110,33 +110,24 @@ export function atualizarInterface(anime) {
     if (!anime) return;
 
     const resultCard = document.getElementById('result-card');
-    const animeTitle = document.getElementById('anime-title');
-    const animeDesc = document.getElementById('anime-desc');
-    const animeScore = document.getElementById('anime-score');
-    const anilistLink = document.getElementById('anilist-link');
     const imgTag = document.getElementById('anime-img-tag');
 
     if (imgTag && anime.coverImage) {
-        const capa = anime.coverImage.extraLarge || anime.coverImage.large;
-        imgTag.src = capa;
-        imgTag.style.display = 'block';
+        imgTag.src = anime.coverImage.extraLarge || anime.coverImage.large;
     }
 
-    if (animeTitle) animeTitle.innerText = anime.title.romaji;
-    if (animeScore) animeScore.innerText = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : "0.0";
+    document.getElementById('anime-title').innerText = anime.title.romaji;
+    document.getElementById('anime-score').innerText = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : "0.0";
     
-    if (animeDesc) {
-        animeDesc.innerText = anime.description ? anime.description.replace(/<[^>]*>?/gm, '') : "Sem descrição.";
-        animeDesc.scrollTop = 0; 
-    }
+    const desc = document.getElementById('anime-desc');
+    desc.innerText = anime.description ? anime.description.replace(/<[^>]*>?/gm, '') : "";
+    desc.scrollTop = 0; 
 
-    if (anilistLink) {
-        anilistLink.onclick = () => window.open(anime.siteUrl, '_blank');
-    }
+    document.getElementById('anilist-link').onclick = () => window.open(anime.siteUrl, '_blank');
 
     if (resultCard) {
         resultCard.classList.remove('hidden');
-        resultCard.style.display = 'flex'; 
+        resultCard.style.display = 'flex';
         
         setTimeout(() => {
             resultCard.classList.remove('opacity-0', 'translate-y-10');
