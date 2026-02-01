@@ -35,7 +35,7 @@ A **Anime Roulette** utiliza a API do AniList para sortear animes com base nos s
 ---
 
 ## 🎨 Como usar?
-1.  **Acesse o link**: [INSIRA_AQUI_O_LINK_DO_SEU_PAGES]
+1.  **Acesse o link**: [https://rafinha-rf.github.io/anime-roulette/]
 2.  **Defina os filtros**: 
     * Quer um anime ruim? Coloque a Nota Máx. em **4.0**.
     * Quer algo da sua lista? Digite seu **User Name** e mude a origem para **Planning**.
