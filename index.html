@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Anime Roulette</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8b5cf6",
+                        "background-dark": "#0a0a0c",
+                        "card-dark": "#16161e",
+                    },
+                    fontFamily: { "display": ["Plus Jakarta Sans", "sans-serif"] }
+                },
+            },
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer base {
+            body { 
+                @apply bg-background-dark text-slate-200 antialiased font-display; 
+            }
+        }
+
+        @layer components {
+            .custom-select {
+                @apply appearance-none bg-[#16161e] border border-white/10 rounded-xl px-4 py-2 pr-10 text-sm outline-none focus:ring-1 focus:ring-primary text-slate-200 cursor-pointer;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 0.75rem center;
+                background-size: 1rem;
+            }
+
+            .custom-select option {
+                @apply bg-[#16161e] text-slate-200;
+            }
+        }
+
+        .glassmorphism {
+            background: rgba(22, 22, 30, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .roulette-gradient {
+            background: conic-gradient(#8b5cf6 0deg 45deg, #a78bfa 45deg 90deg, #1e1e2e 90deg 135deg, #00b894 135deg 180deg, #8b5cf6 180deg 225deg, #fd79a8 225deg 270deg, #0984e3 270deg 315deg, #fdcb6e 315deg 360deg);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+        @keyframes success-glow {
+            0% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.2); }
+            50% { box-shadow: 0 0 30px rgba(139, 92, 246, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.2); }
+        }
+
+        .animate-glow {
+            animation: success-glow 2s infinite ease-in-out;
+            border: 1px solid rgba(139, 92, 246, 0.5) !important;
+        }
+
+        .wheel-flash {
+            filter: brightness(1.5) contrast(1.2);
+            transition: filter 0.5s ease;
+        }
+
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center">
+
+    <header class="w-full max-w-6xl py-10 px-6 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div class="absolute top-4 right-4 flex gap-2">
+            <button onclick="setLanguage('pt')" class="text-xs font-bold hover:text-primary transition-colors">PT</button>
+            <span class="text-slate-700">|</span>
+            <button onclick="setLanguage('en')" class="text-xs font-bold hover:text-primary transition-colors">EN</button>
+        </div>
+        
+        <div class="flex-shrink-0 min-w-fit">
+            <h1 class="text-3xl font-black text-white tracking-tighter italic leading-none whitespace-nowrap">
+                ANIME ROULETTE
+            </h1>
+            <p class="text-slate-500 text-sm font-bold uppercase tracking-widest mt-1 whitespace-nowrap">
+                Descubra seu próximo anime
+            </p>
+        </div>
+        
+        <div class="flex flex-wrap gap-4 justify-center">
+            <div class="flex flex-col gap-1">
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Usuário</label>
+                <div class="relative">
+                    <input type="text" id="user-filter" placeholder="Nick AniList"
+                        class="bg-[#16161e] border border-white/10 rounded-xl px-4 py-2 text-base outline-none focus:ring-1 focus:ring-primary w-56 h-[42px] placeholder:text-slate-600">
+                </div>
+            </div>
+        
+            <div class="flex flex-col gap-1">
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Origem</label>
+                <select id="source-filter" class="custom-select w-56 h-[42px]">
+                    <option value="all">Todos</option>
+                    <option value="PLANNING">Minha Lista (Planning)</option>
+                </select>
+            </div>
+        
+            <div class="flex flex-col gap-1">
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Gênero</label>
+                <select id="genre-filter" class="custom-select w-44 h-[42px]">
+                    <option value="">Todos</option>
+                    <option value="Action">Ação</option>
+                    <option value="Comedy">Comédia</option>
+                    <option value="Seinen">Seinen</option>
+                    <option value="Adventure">Aventura</option>
+                    <option value="Drama">Drama</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Nota Mín.</label>
+                    <select id="score-min" class="custom-select w-24">
+                        <option value="1">1.0</option>
+                        <option value="2">2.0</option>
+                        <option value="3">3.0</option>
+                        <option value="4">4.0</option>
+                        <option value="5">5.0</option>
+                        <option value="6">6.0</option>
+                        <option value="7">7.0</option>
+                        <option value="8">8.0</option>
+                        <option value="9">9.0</option>
+                    </select>
+                </div>
+                <span class="text-slate-500 mt-5">➔</span>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Nota Máx.</label>
+                    <select id="score-max" class="custom-select w-24">
+                        <option value="10">10.0</option>
+                        <option value="9">9.0</option>
+                        <option value="8">8.0</option>
+                        <option value="7">7.0</option>
+                        <option value="6">6.0</option>
+                        <option value="5">5.0</option>
+                        <option value="4">4.0</option>
+                        <option value="3">3.0</option>
+                        <option value="2">2.0</option>
+                        <option value="1">1.0</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-6xl flex-1 flex flex-col lg:flex-row items-center justify-center gap-12 p-6 mb-10">
+
+        <div class="relative group">
+            <div class="absolute inset-0 bg-primary/20 blur-[100px] rounded-full"></div>
+            <div
+                class="relative size-80 sm:size-[450px] glassmorphism rounded-full p-4 sm:p-6 flex items-center justify-center shadow-2xl">
+                <div id="wheel"
+                    class="size-full rounded-full border-[6px] border-white/10 roulette-gradient relative shadow-inner transition-transform duration-[4000ms] cubic-bezier(0.15, 0, 0.15, 1)">
+                    <div class="absolute inset-0 flex items-center justify-center overflow-hidden rounded-full opacity-10">
+                        <div class="absolute w-full h-px bg-white rotate-0"></div>
+                        <div class="absolute w-full h-px bg-white rotate-45"></div>
+                        <div class="absolute w-full h-px bg-white rotate-90"></div>
+                        <div class="absolute w-full h-px bg-white rotate-135"></div>
+                    </div>
+                </div>
+                <div class="absolute -top-1 left-1/2 -translate-x-1/2 z-30 w-5 h-7 bg-white rounded-b-full shadow-xl"></div>
+                <button id="spin-button"
+                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-20 sm:size-24 bg-white text-background-dark rounded-full shadow-2xl flex flex-col items-center justify-center z-40 hover:scale-110 active:scale-95 transition-all">
+                    <span class="text-[10px] font-black uppercase tracking-widest leading-none">Girar</span>
+                    <span class="material-symbols-outlined text-3xl">casino</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="w-full max-w-[400px] h-[770px]">
+            <div id="result-card"
+                class="glassmorphism rounded-3xl h-full flex flex-col overflow-hidden shadow-2xl border-white/5 opacity-0 transition-all duration-700 translate-y-10">
+                <div class="relative h-1/2 shrink-0 overflow-hidden">
+                    <div id="anime-img" class="absolute inset-0 bg-cover bg-center" style="background-image: url('')"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-transparent"></div>
+                    <div
+                        class="absolute top-4 right-4 bg-[#00b894] text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-lg">
+                        <span class="material-symbols-outlined text-sm fill-current">star</span>
+                        <span id="anime-score">0.0</span>
+                    </div>
+                </div>
+                <div class="p-6 flex flex-col flex-1 overflow-hidden bg-[#121212]">
+                    <h3 id="anime-title" class="text-xl font-bold leading-tight text-white mb-3 break-words">Título</h3>
+                    <div id="anime-desc"
+                        class="text-sm text-slate-400 leading-relaxed overflow-y-auto custom-scrollbar pr-2 mb-4 flex-1">
+                        A sinopse aparecerá aqui.
+                    </div>
+                    <div class="mt-auto pt-2">
+                        <button id="anilist-link"
+                            class="w-full py-4 bg-primary hover:bg-primary-hover text-white rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                            Detalhes no AniList
+                            <span class="material-symbols-outlined text-lg">arrow_outward</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <section id="history-section" class="w-full max-w-6xl px-6 py-10 border-t border-white/5 mx-auto mb-20">
+        <div class="flex items-center gap-2 mb-8">
+            <span class="material-symbols-outlined text-primary">history</span>
+            <h2 class="text-xl font-bold text-white uppercase tracking-widest">Sorteios Recentes</h2>
+
+            <button id="clear-history" class="text-xs font-bold text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1 uppercase tracking-widest">
+                <span class="material-symbols-outlined text-sm">delete_sweep</span>
+                Limpar
+             </button>
+
+        </div>
+        <div id="history-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        </div>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script type="module" src="./js/main.js"></script>
+    
+    <div id="custom-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    
+    <div class="relative w-full max-w-sm glassmorphism rounded-3xl p-8 shadow-2xl border-white/10 scale-95 transition-all">
+        <div class="flex flex-col items-center text-center">
+            <div class="size-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-6 text-primary">
+                <span class="material-symbols-outlined text-4xl">warning</span>
+            </div>
+            <h2 id="modal-title" class="text-xl font-bold text-white mb-2">Ops! Algo deu errado</h2>
+            <p id="modal-message" class="text-slate-400 text-sm leading-relaxed mb-8">
+                Mensagem de erro aqui.
+            </p>
+            <button onclick="closeModal()" class="w-full py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-primary/20">
+                Entendido
+            </button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
