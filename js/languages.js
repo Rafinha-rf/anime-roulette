@@ -15,7 +15,13 @@ export const translations = {
         historyTitle: "Sorteios Recentes",
         noHistory: "Nenhum anime sorteado ainda.",
         historyTitle: "Sorteios Recentes",
-        clearHistory: "Limpar"  
+        clearHistory: "Limpar",
+        errorFilterTitle: "Erro de Filtro",
+        errorFilterMsg: "A nota mínima não pode ser maior que a máxima.",
+        errorNotFoundTitle: "Nenhum anime encontrado",
+        errorNotFoundMsg: "Não encontramos nada com esses filtros. Tente mudar o gênero ou buscar no catálogo geral!",
+        errorUserTitle: "Usuário Inválido",
+        errorUserMsg: "Não encontramos o perfil informado. Verifique o nick ou a privacidade da conta."  
     },
     en: {
         title: "ANIME ROULETTE",
@@ -33,6 +39,12 @@ export const translations = {
         historyTitle: "Recent Spins",
         noHistory: "No animes spun yet.",
         historyTitle: "Recent Spins",
-        clearHistory: "Clear All"
+        clearHistory: "Clear All",
+        errorFilterTitle: "Filter Error",
+        errorFilterMsg: "Min score cannot be higher than max score.",
+        errorNotFoundTitle: "No anime found",
+        errorNotFoundMsg: "We couldn't find anything with these filters. Try changing the genre or searching the general catalog!",
+        errorUserTitle: "Invalid User",
+        errorUserMsg: "We couldn't find the specified profile. Check the username or account privacy."
     }
 };
