@@ -1,6 +1,7 @@
 const url = 'https://graphql.anilist.co';
+import { translations } from './languages.js';
 
-async function obterListasUsuario(userName) {
+async function obterDadosUsuarioIndividual(userName) {
     const query = `
     query ($userName: String) {
       MediaListCollection(userName: $userName, type: ANIME) {
@@ -22,7 +23,6 @@ async function obterListasUsuario(userName) {
         const data = await response.json();
 
         if (data.errors || !data.data || !data.data.MediaListCollection) {
-            window.openModal("Usuário Inválido", `Não encontramos o perfil "${userName}". Verifique o nick ou a privacidade da conta.`);
             return null;
         }
 
@@ -45,31 +45,61 @@ async function obterListasUsuario(userName) {
 }
 
 
-export async function buscarAnime(genero, scoreMin, scoreMax) {
-    const usuario = document.getElementById('user-filter').value.trim();
-    const origem = document.getElementById('source-filter')?.value || 'all';
+async function obterListasMultiplosUsuarios(inputNomes) {
+    const lang = localStorage.getItem('preferred_lang') || 'pt';
+    const t = translations[lang];
     
+
+    const nomes = inputNomes.split(',').map(n => n.trim()).filter(n => n !== "");
+    
+    let planningCombinado = [];
+    let todosCombinados = [];
+
+    for (const nome of nomes) {
+        const dados = await obterDadosUsuarioIndividual(nome);
+        
+        if (!dados) {
+            window.openModal(t.errorUserTitle, `${t.errorUserMsg} (${nome})`);
+            return null;
+        }
+
+        planningCombinado = [...planningCombinado, ...dados.planning];
+        todosCombinados = [...todosCombinados, ...dados.todos];
+    }
+
+
+    return {
+        planning: [...new Set(planningCombinado)],
+        todos: [...new Set(todosCombinados)]
+    };
+}
+
+
+export async function buscarAnime(genero, scoreMin, scoreMax) {
+    const usuarioInput = document.getElementById('user-filter').value.trim();
+    const origem = document.getElementById('source-filter')?.value || 'all';
+    const lang = localStorage.getItem('preferred_lang') || 'pt';
+    const t = translations[lang];
+
     let includeIds = undefined;
     let excludeIds = undefined;
 
-    if (usuario !== "") {
-        const listas = await obterListasUsuario(usuario);
+    if (usuarioInput !== "") {
+
+        const listas = await obterListasMultiplosUsuarios(usuarioInput);
         if (listas === null) return null;
 
         if (origem === "PLANNING") {
-           
             if (listas.planning.length === 0) {
-                window.openModal("Lista Vazia", "Sua lista de 'Planning' (Planejando) está vazia no AniList.");
+                window.openModal(t.errorEmptyListTitle, t.errorEmptyListMsg);
                 return null;
             }
             includeIds = listas.planning;
         } else {
-            
             excludeIds = listas.todos;
         }
     }
 
-    
     const query = `
     query ($genre: String, $min: Int, $max: Int, $in: [Int], $notIn: [Int]) {
       Page(page: 1, perPage: 50) {
@@ -106,9 +136,9 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
     }
 }
 
+
 export function atualizarInterface(anime) {
     if (!anime) return;
-
     const resultCard = document.getElementById('result-card');
     const imgTag = document.getElementById('anime-img-tag');
 
