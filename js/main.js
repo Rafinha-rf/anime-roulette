@@ -136,6 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setTimeout(() => {
             if (anime) {
+                resultCard.classList.remove('hidden');
+                resultCard.style.display = 'flex';
                 if (typeof confetti === 'function') {
                     const duration = 3 * 1000;
                     const end = Date.now() + duration;
@@ -222,4 +224,5 @@ function renderizarHistorico() {
             </div>
         </a>
     `).join('');
+
 }
