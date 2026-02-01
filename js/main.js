@@ -190,7 +190,7 @@ function salvarNoHistorico(anime) {
 
     historico = historico.filter(item => item.id !== anime.id);
     historico.unshift(novoItem);
-    historico = historico.slice(0, 5);
+    historico = historico.slice(0, 4);
 
     localStorage.setItem('anime_history', JSON.stringify(historico));
     renderizarHistorico();
