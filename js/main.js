@@ -23,6 +23,9 @@ function applyLanguage(lang) {
     document.querySelector('header p').innerText = t.subtitle;
     document.getElementById('spin-button').querySelector('span').innerText = t.spinBtn;
     
+    const helpText = document.getElementById('user-help-text');
+    if (helpText) helpText.innerText = t.userHelp;
+
     const labels = document.querySelectorAll('label');
     labels[0].innerText = t.userLabel;
     labels[1].innerText = t.sourceLabel;
