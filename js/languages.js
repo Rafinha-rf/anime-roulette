@@ -10,18 +10,19 @@ export const translations = {
         spinBtn: "Girar",
         any: "Todos",
         sourceGlobal: "Todos",
-        sourcePlanning: "Minha Lista (Planning)",
+        sourcePlanning: "Planning",
         detailsBtn: "Detalhes no AniList",
         historyTitle: "Sorteios Recentes",
         noHistory: "Nenhum anime sorteado ainda.",
-        historyTitle: "Sorteios Recentes",
         clearHistory: "Limpar",
         errorFilterTitle: "Erro de Filtro",
         errorFilterMsg: "A nota mínima não pode ser maior que a máxima.",
         errorNotFoundTitle: "Nenhum anime encontrado",
-        errorNotFoundMsg: "Não encontramos nada com esses filtros. Tente mudar o gênero ou buscar no catálogo geral!",
+        errorNotFoundMsg: "Não encontramos nada com esses filtros. Tente mudar o gênero!",
         errorUserTitle: "Usuário Inválido",
-        errorUserMsg: "Não encontramos o perfil informado. Verifique o nick ou a privacidade da conta."  
+        errorUserMsg: "Não encontramos o perfil informado ou a conta é privada.",
+        errorEmptyListTitle: "Lista Vazia",
+        errorEmptyListMsg: "Sua lista de 'Planning' está vazia no AniList."
     },
     en: {
         title: "ANIME ROULETTE",
@@ -38,13 +39,14 @@ export const translations = {
         detailsBtn: "AniList Details",
         historyTitle: "Recent Spins",
         noHistory: "No animes spun yet.",
-        historyTitle: "Recent Spins",
         clearHistory: "Clear All",
         errorFilterTitle: "Filter Error",
         errorFilterMsg: "Min score cannot be higher than max score.",
         errorNotFoundTitle: "No anime found",
-        errorNotFoundMsg: "We couldn't find anything with these filters. Try changing the genre or searching the general catalog!",
+        errorNotFoundMsg: "We couldn't find anything with these filters.",
         errorUserTitle: "Invalid User",
-        errorUserMsg: "We couldn't find the specified profile. Check the username or account privacy."
+        errorUserMsg: "Profile not found or it is set to private.",
+        errorEmptyListTitle: "Empty List",
+        errorEmptyListMsg: "Your 'Planning' list is empty on AniList."
     }
 };
