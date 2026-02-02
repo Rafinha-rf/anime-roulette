@@ -9,7 +9,7 @@
 ---
 
 ## 💡 A Origem
-Este projeto nasceu de uma tradição peculiar entre amigos: a busca incessante pelos **piores animes já produzidos**. Para facilitar (ou dificultar) nossas vidas, decidi criar uma ferramenta que automatizasse esse "masoquismo cultural". 
+Este projeto nasceu de uma tradição peculiar entre amigos(Nescau,Henrl): a busca incessante pelos **piores animes já produzidos**. Para facilitar (ou dificultar) nossas vidas, decidi criar uma ferramenta que automatizasse esse "masoquismo cultural". 
 
 A **Anime Roulette** utiliza a API do AniList para sortear animes com base nos seus filtros, permitindo que você encontre desde obras-primas até aqueles desastres que rendem ótimas risadas.
 
