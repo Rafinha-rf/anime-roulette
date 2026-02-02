@@ -139,23 +139,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 resultCard.classList.remove('hidden');
                 resultCard.style.display = 'flex';
                 if (typeof confetti === 'function') {
+                    const coresDaRoleta = ['#8b5cf6', '#a78bfa', '#00b894', '#fd79a8', '#0984e3', '#fdcb6e'];
                     const duration = 3 * 1000;
                     const end = Date.now() + duration;
 
                     (function frame() {
                         confetti({
-                            particleCount: 2,
+                            particleCount: 6,
                             angle: 60,
                             spread: 55,
                             origin: { x: 0 },
-                            colors: ['#8b5cf6', '#ffffff']
+                            colors: coresDaRoleta
                         });
                         confetti({
-                            particleCount: 2,
+                            particleCount: 6,
                             angle: 120,
                             spread: 55,
                             origin: { x: 1 },
-                            colors: ['#8b5cf6', '#ffffff']
+                            colors: coresDaRoleta
                         });
 
                         if (Date.now() < end) requestAnimationFrame(frame);
