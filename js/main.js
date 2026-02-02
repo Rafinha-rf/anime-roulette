@@ -73,6 +73,11 @@ document.addEventListener('DOMContentLoaded', () => {
         spinBtn.disabled = true;
         const anime = await buscarAnime(document.getElementById('genre-filter').value, sMin, sMax);
 
+        if (anime === "USER_ERROR") {
+            spinBtn.disabled = false;
+            return;
+        }
+
         if (!anime) {
             spinBtn.disabled = false;
             return;

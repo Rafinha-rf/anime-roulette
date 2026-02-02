@@ -49,19 +49,26 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
     const usuarioInput = document.getElementById('user-filter').value.trim();
     const origem = document.getElementById('source-filter')?.value || 'all';
 
-    let includeIds, excludeIds;
+    let includeIds = null;
+    let excludeIds = null;
 
     if (usuarioInput !== "") {
         const listas = await obterListasMultiplosUsuarios(usuarioInput);
-        if (!listas) return null;
+        if (!listas) return "USER_ERROR";
+
         if (origem === "PLANNING") {
-            if (listas.planning.length === 0) {
+            if (!listas.planning || listas.planning.length === 0) {
                 window.openModal(t.errorEmptyListTitle, t.errorEmptyListMsg);
-                return null;
+                return "USER_ERROR";
             }
-            includeIds = listas.planning;
-        } else { excludeIds = listas.todos; }
+
+            includeIds = listas.planning.sort(() => 0.5 - Math.random()).slice(0, 50);
+        } else { 
+            excludeIds = (listas.todos && listas.todos.length > 0) ? listas.todos.slice(0, 100) : null; 
+        }
     }
+
+    const paginaSorteada = includeIds ? 1 : Math.floor(Math.random() * 5) + 1;
 
     const query = `query ($page: Int, $genre: String, $min: Int, $max: Int, $in: [Int], $notIn: [Int]) {
         Page(page: $page, perPage: 50) {
@@ -72,24 +79,41 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
     }`;
 
     const variables = {
-        page: Math.floor(Math.random() * 5) + 1,
+        page: paginaSorteada,
         genre: genero || undefined,
         min: parseInt(scoreMin) * 10,
-        max: parseInt(scoreMax) * 10,
-        in: includeIds,
-        notIn: excludeIds
+        max: parseInt(scoreMax) * 10
     };
 
+    if (includeIds) variables.in = includeIds;
+    if (excludeIds) variables.notIn = excludeIds;
+
     try {
-        const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query, variables }) });
+        const response = await fetch(url, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ query, variables }) 
+        });
+
         const data = await response.json();
-        const lista = data.data.Page.media;
+
+        if (data.errors) {
+            console.error("Erro técnico AniList:", data.errors);
+            return "USER_ERROR"; 
+        }
+
+        const lista = data.data?.Page?.media;
+        
         if (!lista || lista.length === 0) {
             window.openModal(t.errorNotFoundTitle, t.errorNotFoundMsg);
             return null;
         }
+
         return lista[Math.floor(Math.random() * lista.length)];
-    } catch (error) { return null; }
+    } catch (error) { 
+        console.error("Erro crítico:", error);
+        return "USER_ERROR"; 
+    }
 }
 
 export function atualizarInterface(anime) {
