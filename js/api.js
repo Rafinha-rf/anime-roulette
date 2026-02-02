@@ -101,20 +101,30 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
     }
 
     const query = `
-    query ($genre: String, $min: Int, $max: Int, $in: [Int], $notIn: [Int]) {
-      Page(page: 1, perPage: 50) {
-        media(genre: $genre, averageScore_greater: $min, averageScore_lesser: $max, id_in: $in, id_not_in: $notIn, type: ANIME, sort: SCORE_DESC) {
-          id
-          title { romaji }
-          description
-          coverImage { extraLarge }
-          averageScore
-          siteUrl
+    query ($page: Int, $genre: String, $min: Int, $max: Int, $in: [Int], $notIn: [Int]) {
+    Page(page: $page, perPage: 50) { 
+        media(
+        genre: $genre, 
+        averageScore_greater: $min, 
+        averageScore_lesser: $max, 
+        id_in: $in, 
+        id_not_in: $notIn, 
+        type: ANIME, 
+        sort: ID_DESC,
+        format_not_in: [MUSIC]
+        ) {
+        id
+        title { romaji }
+        description
+        coverImage { extraLarge }
+        averageScore
+        siteUrl
         }
-      }
+    }
     }`;
 
     const variables = {
+        page: Math.floor(Math.random() * 5) + 1,
         genre: genero || undefined,
         min: parseInt(scoreMin) * 10,
         max: parseInt(scoreMax) * 10,
