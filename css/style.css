@@ -1,0 +1,97 @@
+/* style.css */
+
+.glassmorphism {
+    background: rgba(22, 22, 30, 0.7);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.roulette-gradient {
+    background: conic-gradient(#8b5cf6 0deg 45deg, #a78bfa 45deg 90deg, #1e1e2e 90deg 135deg, #00b894 135deg 180deg, #8b5cf6 180deg 225deg, #fd79a8 225deg 270deg, #0984e3 270deg 315deg, #fdcb6e 315deg 360deg);
+}
+
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+@keyframes success-glow {
+    0% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.2); }
+    50% { box-shadow: 0 0 30px rgba(139, 92, 246, 0.6); }
+    100% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.2); }
+}
+
+.animate-glow {
+    animation: success-glow 2s infinite ease-in-out;
+    border: 1px solid rgba(139, 92, 246, 0.5) !important;
+}
+
+.wheel-flash {
+    filter: brightness(1.5) contrast(1.2);
+    transition: filter 0.5s ease;
+}
+
+#anime-desc {
+    display: block !important;
+    max-height: 150px !important; 
+    overflow-y: auto !important; 
+    -webkit-overflow-scrolling: touch;
+}
+
+/* NSFW Switch Section */
+.nsfw-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 15px;
+    border-radius: 10px;
+    margin: 0 auto 20px auto;
+    width: 100%;
+    max-width: 300px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nsfw-text {
+    font-size: 0.85rem;
+    color: #e0e0e0;
+    margin-right: 10px;
+    font-weight: 500;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #333;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px; width: 14px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { background-color: #8b5cf6; }
+input:checked + .slider:before { transform: translateX(18px); }
+
+@media (min-width: 640px) {
+    #result-card { max-height: none !important; height: auto !important; }
+    #anime-desc { max-height: none !important; overflow-y: visible !important; }
+}

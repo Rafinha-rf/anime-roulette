@@ -24,6 +24,7 @@ export const translations = {
         errorEmptyListTitle: "Lista Vazia",
         errorEmptyListMsg: "Sua lista de 'Planning' está vazia no AniList.",
         userHelp: "Você pode digitar um único nick ou vários separados por vírgula (ex: Nick1, Nick2). O sorteio buscará animes de todos esses perfis.",
+        nsfwFilter: "Esconder conteúdo adulto",
         genres: {
             all: "Todos",
             action: "Ação",
@@ -65,6 +66,7 @@ export const translations = {
         errorEmptyListTitle: "Empty List",
         errorEmptyListMsg: "Your 'Planning' list is empty on AniList.",
         userHelp: "You can enter a single nick or multiple separated by commas (e.g., Nick1, Nick2). The draw will fetch anime from all these profiles.",
+        nsfwFilter: "Hide adult content",
         genres: {
             all: "All",
             action: "Action",

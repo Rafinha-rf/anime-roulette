@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-
+    <link rel="stylesheet" href="css/style.css">
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -45,56 +45,6 @@
                 @apply bg-[#16161e] text-slate-200;
             }
         }
-
-        .glassmorphism {
-            background: rgba(22, 22, 30, 0.7);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .roulette-gradient {
-            background: conic-gradient(#8b5cf6 0deg 45deg, #a78bfa 45deg 90deg, #1e1e2e 90deg 135deg, #00b894 135deg 180deg, #8b5cf6 180deg 225deg, #fd79a8 225deg 270deg, #0984e3 270deg 315deg, #fdcb6e 315deg 360deg);
-        }
-
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-
-        @keyframes success-glow {
-            0% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.2); }
-            50% { box-shadow: 0 0 30px rgba(139, 92, 246, 0.6); }
-            100% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.2); }
-        }
-
-        .animate-glow {
-            animation: success-glow 2s infinite ease-in-out;
-            border: 1px solid rgba(139, 92, 246, 0.5) !important;
-        }
-
-        .wheel-flash {
-            filter: brightness(1.5) contrast(1.2);
-            transition: filter 0.5s ease;
-        }
-
-        @media (min-width: 640px) {
-            #result-card {
-                max-height: none !important;
-                height: auto !important;
-            }
-            
-            #anime-desc {
-                max-height: none !important;
-                overflow-y: visible !important;
-            }
-        }
-
-        #anime-desc {
-            display: block !important;
-            max-height: 150px !important; 
-            overflow-y: auto !important; 
-            -webkit-overflow-scrolling: touch;
-        }
-
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
@@ -184,6 +134,13 @@
                         <option value="1">1.0</option>
                     </select>
                 </div>
+            </div>
+            <div class="nsfw-container">
+                <span class="nsfw-text" data-i18n="nsfwFilter">Esconder conteúdo adulto</span>
+                <label class="switch">
+                    <input type="checkbox" id="nsfw-filter" checked>
+                    <span class="slider round"></span>
+                </label>
             </div>
         </div>
     </header>

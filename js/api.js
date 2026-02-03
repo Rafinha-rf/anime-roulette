@@ -80,6 +80,7 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
     const t = translations[lang];
     const usuarioInput = document.getElementById('user-filter').value.trim();
     const origem = document.getElementById('source-filter')?.value || 'all';
+    const esconderAdulto = document.getElementById('nsfw-filter')?.checked ?? true;
 
     if (tentativas > 5) {
         window.openModal(t.errorNotFoundTitle, t.errorNotFoundMsg);
@@ -123,9 +124,9 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
     const paginaInicial = (includeIds || notaMuitoAlta) ? 1 : Math.floor(Math.random() * 5) + 1;
     const paginaFinal = paginaInicial + tentativas;
 
-    const query = `query ($page: Int, $genre: String, $min: Int, $max: Int, $in: [Int], $notIn: [Int]) {
+    const query = `query ($page: Int, $genre: String, $min: Int, $max: Int, $in: [Int], $notIn: [Int], $isAdult: Boolean) {
         Page(page: $page, perPage: 50) {
-            media(genre: $genre, averageScore_greater: $min, averageScore_lesser: $max, id_in: $in, id_not_in: $notIn, type: ANIME, sort: ID_DESC, format_not_in: [MUSIC]) {
+            media(genre: $genre, averageScore_greater: $min, averageScore_lesser: $max, id_in: $in, id_not_in: $notIn, isAdult: $isAdult,, type: ANIME, sort: ID_DESC, format_not_in: [MUSIC]) {
                 id title { romaji } description coverImage { extraLarge } averageScore siteUrl
             }
         }
@@ -135,7 +136,8 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
         page: paginaFinal,
         genre: genero || undefined,
         min: parseInt(scoreMin) * 10,
-        max: parseInt(scoreMax) * 10
+        max: parseInt(scoreMax) * 10,
+        isAdult: esconderAdulto ? false : undefined
     };
 
     if (includeIds) variables.in = includeIds;
