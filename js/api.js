@@ -75,18 +75,22 @@ async function obterListasMultiplosUsuarios(inputNomes) {
     return resultadoFinal;
 }
 
-export async function buscarAnime(genero, scoreMin, scoreMax) {
+export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
     const lang = localStorage.getItem('preferred_lang') || 'pt';
     const t = translations[lang];
     const usuarioInput = document.getElementById('user-filter').value.trim();
     const origem = document.getElementById('source-filter')?.value || 'all';
+
+    if (tentativas > 5) {
+        window.openModal(t.errorNotFoundTitle, t.errorNotFoundMsg);
+        return null;
+    }
 
     if (usuarioInput === "") {
         const cachedGlobal = localStorage.getItem(GLOBAL_CACHE_KEY);
         if (cachedGlobal) {
             const { timestamp, data, filters } = JSON.parse(cachedGlobal);
             const mesmosFiltros = filters.genre === genero && filters.min === scoreMin && filters.max === scoreMax;
-            
             if (mesmosFiltros && (Date.now() - timestamp < 5 * 60 * 1000)) {
                 return data[Math.floor(Math.random() * data.length)];
             }
@@ -95,24 +99,29 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
 
     let includeIds = null;
     let excludeIds = null;
+    let listaCompletaJaVistos = [];
 
     if (usuarioInput !== "") {
         const listas = await obterListasMultiplosUsuarios(usuarioInput);
         if (!listas) return "USER_ERROR";
+
+        listaCompletaJaVistos = listas.todos || [];
 
         if (origem === "PLANNING") {
             if (!listas.planning || listas.planning.length === 0) {
                 window.openModal(t.errorEmptyListTitle, t.errorEmptyListMsg);
                 return "USER_ERROR";
             }
-
             includeIds = listas.planning.sort(() => 0.5 - Math.random()).slice(0, 50);
         } else { 
-            excludeIds = (listas.todos && listas.todos.length > 0) ? listas.todos.slice(0, 100) : null; 
+            excludeIds = listaCompletaJaVistos.slice(0, 100); 
         }
     }
 
-    const paginaSorteada = includeIds ? 1 : Math.floor(Math.random() * 5) + 1;
+
+    const notaMuitoAlta = parseInt(scoreMin) >= 9;
+    const paginaInicial = (includeIds || notaMuitoAlta) ? 1 : Math.floor(Math.random() * 5) + 1;
+    const paginaFinal = paginaInicial + tentativas;
 
     const query = `query ($page: Int, $genre: String, $min: Int, $max: Int, $in: [Int], $notIn: [Int]) {
         Page(page: $page, perPage: 50) {
@@ -123,7 +132,7 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
     }`;
 
     const variables = {
-        page: paginaSorteada,
+        page: paginaFinal,
         genre: genero || undefined,
         min: parseInt(scoreMin) * 10,
         max: parseInt(scoreMax) * 10
@@ -146,22 +155,35 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
             return "USER_ERROR"; 
         }
 
-        const lista = data.data?.Page?.media;
-        
-        if (!lista || lista.length === 0) {
+        const listaBruta = data.data?.Page?.media || [];
+
+        if (listaBruta.length === 0) {
+            if (tentativas < 5) {
+                return buscarAnime(genero, scoreMin, scoreMax, tentativas + 1);
+            }
             window.openModal(t.errorNotFoundTitle, t.errorNotFoundMsg);
             return null;
+        }
+
+        const listaFiltrada = listaBruta.filter(anime => {
+            const notaMinimaReal = parseInt(scoreMin) * 10;
+            return anime.averageScore >= notaMinimaReal && !listaCompletaJaVistos.includes(anime.id);
+        });
+
+        if (listaFiltrada.length === 0) {
+            return buscarAnime(genero, scoreMin, scoreMax, tentativas + 1);
         }
 
         if (usuarioInput === "") {
             localStorage.setItem(GLOBAL_CACHE_KEY, JSON.stringify({
                 timestamp: Date.now(),
                 filters: { genre: genero, min: scoreMin, max: scoreMax },
-                data: lista
+                data: listaFiltrada
             }));
         }
 
-        return lista[Math.floor(Math.random() * lista.length)];
+        return listaFiltrada[Math.floor(Math.random() * listaFiltrada.length)];
+
     } catch (error) { 
         console.error("Erro crítico:", error);
         return "USER_ERROR"; 
