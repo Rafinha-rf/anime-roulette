@@ -1,6 +1,9 @@
 const url = 'https://graphql.anilist.co';
 import { translations } from './languages.js';
 
+const CACHE_EXPIRATION_MS = 10 * 60 * 1000;
+const GLOBAL_CACHE_KEY = 'cache_busca_global';
+
 async function obterDadosUsuarioIndividual(userName) {
     const query = `query ($userName: String) { MediaListCollection(userName: $userName, type: ANIME) { lists { status entries { mediaId } } } }`;
     try {
@@ -28,6 +31,18 @@ async function obterListasMultiplosUsuarios(inputNomes) {
     const lang = localStorage.getItem('preferred_lang') || 'pt';
     const t = translations[lang];
     const nomes = inputNomes.split(',').map(n => n.trim()).filter(n => n !== "");
+    
+    const cacheKey = `cache_listas_${nomes.join('_').toLowerCase()}`;
+    
+
+    const cachedData = localStorage.getItem(cacheKey);
+    if (cachedData) {
+        const { timestamp, data } = JSON.parse(cachedData);
+        if (Date.now() - timestamp < CACHE_EXPIRATION_MS) {
+            return data;
+        }
+    }
+
     let planningCombinado = [];
     let todosCombinados = [];
 
@@ -40,7 +55,24 @@ async function obterListasMultiplosUsuarios(inputNomes) {
         planningCombinado = [...planningCombinado, ...dados.planning];
         todosCombinados = [...todosCombinados, ...dados.todos];
     }
-    return { planning: [...new Set(planningCombinado)], todos: [...new Set(todosCombinados)] };
+
+    const resultadoFinal = { 
+        planning: [...new Set(planningCombinado)], 
+        todos: [...new Set(todosCombinados)] 
+    };
+
+    try {
+        localStorage.setItem(cacheKey, JSON.stringify({
+            timestamp: Date.now(),
+            data: resultadoFinal
+        }));
+    } catch (e) {
+        Object.keys(localStorage)
+            .filter(key => key.startsWith('cache_listas_'))
+            .forEach(key => localStorage.removeItem(key));
+    }
+
+    return resultadoFinal;
 }
 
 export async function buscarAnime(genero, scoreMin, scoreMax) {
@@ -49,9 +81,24 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
     const usuarioInput = document.getElementById('user-filter').value.trim();
     const origem = document.getElementById('source-filter')?.value || 'all';
 
+    // 1. TENTATIVA DE CACHE GLOBAL (Quando não há usuário)
+    if (usuarioInput === "") {
+        const cachedGlobal = localStorage.getItem(GLOBAL_CACHE_KEY);
+        if (cachedGlobal) {
+            const { timestamp, data, filters } = JSON.parse(cachedGlobal);
+            const mesmosFiltros = filters.genre === genero && filters.min === scoreMin && filters.max === scoreMax;
+            
+            // Cache global de 5 minutos para manter a variedade
+            if (mesmosFiltros && (Date.now() - timestamp < 5 * 60 * 1000)) {
+                return data[Math.floor(Math.random() * data.length)];
+            }
+        }
+    }
+
     let includeIds = null;
     let excludeIds = null;
 
+    // 2. LÓGICA DE USUÁRIO (Já possui cache próprio dentro de obterListasMultiplosUsuarios)
     if (usuarioInput !== "") {
         const listas = await obterListasMultiplosUsuarios(usuarioInput);
         if (!listas) return "USER_ERROR";
@@ -61,13 +108,14 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
                 window.openModal(t.errorEmptyListTitle, t.errorEmptyListMsg);
                 return "USER_ERROR";
             }
-
+            // Limitação para evitar erro 500
             includeIds = listas.planning.sort(() => 0.5 - Math.random()).slice(0, 50);
         } else { 
             excludeIds = (listas.todos && listas.todos.length > 0) ? listas.todos.slice(0, 100) : null; 
         }
     }
 
+    // Fixar página 1 se houver IDs específicos para evitar lista vazia
     const paginaSorteada = includeIds ? 1 : Math.floor(Math.random() * 5) + 1;
 
     const query = `query ($page: Int, $genre: String, $min: Int, $max: Int, $in: [Int], $notIn: [Int]) {
@@ -107,6 +155,15 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
         if (!lista || lista.length === 0) {
             window.openModal(t.errorNotFoundTitle, t.errorNotFoundMsg);
             return null;
+        }
+
+        // 3. SALVAR NO CACHE GLOBAL (Se for busca sem usuário)
+        if (usuarioInput === "") {
+            localStorage.setItem(GLOBAL_CACHE_KEY, JSON.stringify({
+                timestamp: Date.now(),
+                filters: { genre: genero, min: scoreMin, max: scoreMax },
+                data: lista
+            }));
         }
 
         return lista[Math.floor(Math.random() * lista.length)];

@@ -67,48 +67,65 @@ document.addEventListener('DOMContentLoaded', () => {
         const t = translations[lang];
         const sMin = document.getElementById('score-min').value;
         const sMax = document.getElementById('score-max').value;
+        const genero = document.getElementById('genre-filter').value;
 
         if (parseInt(sMin) > parseInt(sMax)) {
             window.openModal(t.errorFilterTitle, t.errorFilterMsg);
             return;
         }
 
+        const originalContent = spinBtn.innerHTML;
+
+        spinBtn.innerHTML = `<span class="material-symbols-outlined animate-spin text-xl">sync</span>`;
         spinBtn.disabled = true;
-        const anime = await buscarAnime(document.getElementById('genre-filter').value, sMin, sMax);
 
-        if (anime === "USER_ERROR") {
+        const anime = await buscarAnime(genero, sMin, sMax);
+
+        if (anime === "USER_ERROR" || !anime) {
+            spinBtn.innerHTML = originalContent;
             spinBtn.disabled = false;
             return;
         }
 
-        if (!anime) {
-            spinBtn.disabled = false;
-            return;
-        }
+        const imgPreloader = new Image();
+        imgPreloader.src = anime.coverImage.extraLarge;
 
-        currentRotation += Math.floor(Math.random() * 360) + 1440;
-        wheel.style.transform = `rotate(${currentRotation}deg)`;
-        resultCard.classList.add('opacity-0', 'translate-y-10');
 
-        setTimeout(() => {
-            wheel.classList.add('wheel-flash');
-            atualizarInterface(anime);
-            salvarNoHistorico(anime);
+        imgPreloader.onload = () => {
+            currentRotation += Math.floor(Math.random() * 360) + 1440;
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
             
-            if (typeof confetti === 'function') {
-                const cores = ['#8b5cf6', '#a78bfa', '#00b894', '#fd79a8', '#0984e3', '#fdcb6e'];
-                const duration = 3000;
-                const end = Date.now() + duration;
-                (function frame() {
-                    confetti({ particleCount: 6, angle: 60, spread: 55, origin: { x: 0 }, colors: cores });
-                    confetti({ particleCount: 6, angle: 120, spread: 55, origin: { x: 1 }, colors: cores });
-                    if (Date.now() < end) requestAnimationFrame(frame);
-                }());
-            }
-            
+
+            resultCard.classList.add('opacity-0', 'translate-y-10');
+
+            setTimeout(() => {
+                wheel.classList.add('wheel-flash');
+                
+                atualizarInterface(anime);
+                salvarNoHistorico(anime);
+                
+                if (typeof confetti === 'function') {
+                    const cores = ['#8b5cf6', '#a78bfa', '#00b894', '#fd79a8', '#0984e3', '#fdcb6e'];
+                    const duration = 3000;
+                    const end = Date.now() + duration;
+                    (function frame() {
+                        confetti({ particleCount: 6, angle: 60, spread: 55, origin: { x: 0 }, colors: cores });
+                        confetti({ particleCount: 6, angle: 120, spread: 55, origin: { x: 1 }, colors: cores });
+                        if (Date.now() < end) requestAnimationFrame(frame);
+                    }());
+                }
+
+                spinBtn.innerHTML = originalContent;
+                spinBtn.disabled = false;
+                setTimeout(() => wheel.classList.remove('wheel-flash'), 500);
+            }, 4000);
+        };
+
+        imgPreloader.onerror = () => {
+            console.error("Erro ao carregar imagem do anime.");
+            spinBtn.innerHTML = originalContent;
             spinBtn.disabled = false;
-            setTimeout(() => wheel.classList.remove('wheel-flash'), 500);
-        }, 4000);
+        };
     });
 
     document.getElementById('clear-history').addEventListener('click', () => {
