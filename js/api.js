@@ -112,12 +112,12 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
                 window.openModal(t.errorEmptyListTitle, t.errorEmptyListMsg);
                 return "USER_ERROR";
             }
+
             includeIds = listas.planning.sort(() => 0.5 - Math.random()).slice(0, 50);
         } else { 
             excludeIds = listaCompletaJaVistos.slice(0, 100); 
         }
     }
-
 
     const notaMuitoAlta = parseInt(scoreMin) >= 9;
     const paginaInicial = (includeIds || notaMuitoAlta) ? 1 : Math.floor(Math.random() * 5) + 1;
@@ -158,6 +158,10 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
         const listaBruta = data.data?.Page?.media || [];
 
         if (listaBruta.length === 0) {
+            if (includeIds) {
+                window.openModal(t.errorNotFoundTitle, t.errorNotFoundMsg);
+                return null;
+            }
             if (tentativas < 5) {
                 return buscarAnime(genero, scoreMin, scoreMax, tentativas + 1);
             }
@@ -165,13 +169,23 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
             return null;
         }
 
-        const listaFiltrada = listaBruta.filter(anime => {
+        let listaFiltrada = listaBruta.filter(anime => {
             const notaMinimaReal = parseInt(scoreMin) * 10;
-            return anime.averageScore >= notaMinimaReal && !listaCompletaJaVistos.includes(anime.id);
+            const score = anime.averageScore || 0;
+            return score >= notaMinimaReal && !listaCompletaJaVistos.includes(anime.id);
         });
 
+        if (listaFiltrada.length === 0 && includeIds) {
+            console.warn("Filtro rigoroso falhou no Planning. Ignorando nota/vistos para garantir resultado.");
+            listaFiltrada = listaBruta; 
+        }
+
         if (listaFiltrada.length === 0) {
-            return buscarAnime(genero, scoreMin, scoreMax, tentativas + 1);
+            if (tentativas < 5) {
+                return buscarAnime(genero, scoreMin, scoreMax, tentativas + 1);
+            }
+            window.openModal(t.errorNotFoundTitle, t.errorNotFoundMsg);
+            return null;
         }
 
         if (usuarioInput === "") {
