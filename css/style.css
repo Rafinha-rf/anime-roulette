@@ -37,25 +37,30 @@
     -webkit-overflow-scrolling: touch;
 }
 
-/* NSFW Switch Section */
 .nsfw-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 8px 15px;
-    border-radius: 10px;
-    margin: 0 auto 20px auto;
+
+    background-color: #16161e; 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    
+    gap: 10px;
+    padding: 0 15px;
+    border-radius: 12px;
+    height: 42px;
     width: 100%;
-    max-width: 300px;
     box-sizing: border-box;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.nsfw-container:hover {
+    border-color: rgba(139, 92, 246, 0.5);
 }
 
 .nsfw-text {
     font-size: 0.85rem;
     color: #e0e0e0;
-    margin-right: 10px;
     font-weight: 500;
 }
 
