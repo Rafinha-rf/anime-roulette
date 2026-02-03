@@ -24,6 +24,21 @@ export const translations = {
         errorEmptyListTitle: "Lista Vazia",
         errorEmptyListMsg: "Sua lista de 'Planning' está vazia no AniList.",
         userHelp: "Você pode digitar um único nick ou vários separados por vírgula (ex: Nick1, Nick2). O sorteio buscará animes de todos esses perfis.",
+        genres: {
+            all: "Todos",
+            action: "Ação",
+            adventure: "Aventura",
+            comedy: "Comédia",
+            drama: "Drama",
+            romance: "Romance",
+            fantasy: "Fantasia",
+            scifi: "Ficção Científica",
+            horror: "Terror",
+            mystery: "Mistério",
+            slice: "Slice of Life",
+            thriller: "Suspense",
+            supernatural: "Sobrenatural"
+        }
     },
     en: {
         title: "ANIME ROULETTE",
@@ -50,5 +65,20 @@ export const translations = {
         errorEmptyListTitle: "Empty List",
         errorEmptyListMsg: "Your 'Planning' list is empty on AniList.",
         userHelp: "You can enter a single nick or multiple separated by commas (e.g., Nick1, Nick2). The draw will fetch anime from all these profiles.",
+        genres: {
+            all: "All",
+            action: "Action",
+            adventure: "Adventure",
+            comedy: "Comedy",
+            drama: "Drama",
+            romance: "Romance",
+            fantasy: "Fantasy",
+            scifi: "Sci-Fi",
+            horror: "Horror",
+            mystery: "Mystery",
+            slice: "Slice of Life",
+            thriller: "Thriller",
+            supernatural: "Supernatural"
+        }
     }
 };

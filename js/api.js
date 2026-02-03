@@ -81,14 +81,12 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
     const usuarioInput = document.getElementById('user-filter').value.trim();
     const origem = document.getElementById('source-filter')?.value || 'all';
 
-    // 1. TENTATIVA DE CACHE GLOBAL (Quando não há usuário)
     if (usuarioInput === "") {
         const cachedGlobal = localStorage.getItem(GLOBAL_CACHE_KEY);
         if (cachedGlobal) {
             const { timestamp, data, filters } = JSON.parse(cachedGlobal);
             const mesmosFiltros = filters.genre === genero && filters.min === scoreMin && filters.max === scoreMax;
             
-            // Cache global de 5 minutos para manter a variedade
             if (mesmosFiltros && (Date.now() - timestamp < 5 * 60 * 1000)) {
                 return data[Math.floor(Math.random() * data.length)];
             }
@@ -98,7 +96,6 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
     let includeIds = null;
     let excludeIds = null;
 
-    // 2. LÓGICA DE USUÁRIO (Já possui cache próprio dentro de obterListasMultiplosUsuarios)
     if (usuarioInput !== "") {
         const listas = await obterListasMultiplosUsuarios(usuarioInput);
         if (!listas) return "USER_ERROR";
@@ -108,14 +105,13 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
                 window.openModal(t.errorEmptyListTitle, t.errorEmptyListMsg);
                 return "USER_ERROR";
             }
-            // Limitação para evitar erro 500
+
             includeIds = listas.planning.sort(() => 0.5 - Math.random()).slice(0, 50);
         } else { 
             excludeIds = (listas.todos && listas.todos.length > 0) ? listas.todos.slice(0, 100) : null; 
         }
     }
 
-    // Fixar página 1 se houver IDs específicos para evitar lista vazia
     const paginaSorteada = includeIds ? 1 : Math.floor(Math.random() * 5) + 1;
 
     const query = `query ($page: Int, $genre: String, $min: Int, $max: Int, $in: [Int], $notIn: [Int]) {
@@ -157,7 +153,6 @@ export async function buscarAnime(genero, scoreMin, scoreMax) {
             return null;
         }
 
-        // 3. SALVAR NO CACHE GLOBAL (Se for busca sem usuário)
         if (usuarioInput === "") {
             localStorage.setItem(GLOBAL_CACHE_KEY, JSON.stringify({
                 timestamp: Date.now(),

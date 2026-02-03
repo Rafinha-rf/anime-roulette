@@ -19,36 +19,67 @@ window.closeModal = () => document.getElementById('custom-modal').classList.add(
 
 function applyLanguage(lang) {
     const t = translations[lang];
+    
     document.querySelector('h1').innerText = t.title;
     document.querySelector('header p').innerText = t.subtitle;
-    document.getElementById('spin-button').querySelector('span').innerText = t.spinBtn;
     
+    const spinBtn = document.getElementById('spin-button');
+    if (spinBtn.querySelector('span')) {
+        spinBtn.querySelector('span').innerText = t.spinBtn;
+    }
+
     const helpText = document.getElementById('user-help-text');
     if (helpText) helpText.innerText = t.userHelp;
 
-    const labels = document.querySelectorAll('label');
-    labels[0].innerText = t.userLabel;
-    labels[1].innerText = t.sourceLabel;
-    labels[2].innerText = t.genreLabel;
-    labels[3].innerText = t.scoreMin;
-    labels[4].innerText = t.scoreMax;
+    document.getElementById('label-genre').innerText = t.genreLabel;
 
-    document.getElementById('user-filter').placeholder = lang === 'pt' ? 'Nick Anilist' : 'Anilist Nick';
+    const labels = document.querySelectorAll('label');
+    if (labels.length >= 5) {
+        labels[0].innerText = t.userLabel;
+        labels[1].innerText = t.sourceLabel;
+        labels[3].innerText = t.scoreMin;
+        labels[4].innerText = t.scoreMax;
+    }
+
+
+    document.getElementById('user-filter').placeholder = lang === 'pt' ? 'Nick AniList' : 'AniList Nick';
+
+
     document.getElementById('clear-history').innerHTML = `<span class="material-symbols-outlined text-sm">delete_sweep</span> ${t.clearHistory}`;
     document.querySelector('#history-section h2').innerText = t.historyTitle;
 
+    const genreSelect = document.getElementById('genre-filter');
+    const valorAtual = genreSelect.value;
+
+    const listaGeneros = [
+        { val: "", text: t.genres.all },
+        { val: "Action", text: t.genres.action },
+        { val: "Adventure", text: t.genres.adventure },
+        { val: "Comedy", text: t.genres.comedy },
+        { val: "Drama", text: t.genres.drama },
+        { val: "Romance", text: t.genres.romance },
+        { val: "Fantasy", text: t.genres.fantasy },
+        { val: "Sci-Fi", text: t.genres.scifi },
+        { val: "Horror", text: t.genres.horror },
+        { val: "Mystery", text: t.genres.mystery },
+        { val: "Slice of Life", text: t.genres.slice },
+        { val: "Thriller", text: t.genres.thriller },
+        { val: "Supernatural", text: t.genres.supernatural }
+    ];
+
+    genreSelect.innerHTML = listaGeneros.map(g => 
+        `<option value="${g.val}" ${g.val === valorAtual ? 'selected' : ''}>${g.text}</option>`
+    ).join('');
+    
     const sourceSelect = document.getElementById('source-filter');
-    sourceSelect.options[0].text = t.sourceGlobal;
-    sourceSelect.options[1].text = t.sourcePlanning;
-    document.getElementById('genre-filter').options[0].text = t.any;
+    if (sourceSelect && sourceSelect.options.length >= 2) {
+        sourceSelect.options[0].text = t.sourceGlobal;
+        sourceSelect.options[1].text = t.sourcePlanning;
+    }
 
     const detailsBtn = document.getElementById('anilist-link');
     if (detailsBtn) {
-        detailsBtn.innerText = t.detailsBtn + " ";
-        const span = document.createElement('span');
-        span.className = "material-symbols-outlined text-lg";
-        span.innerText = "arrow_outward";
-        detailsBtn.appendChild(span);
+        detailsBtn.innerHTML = `${t.detailsBtn} <span class="material-symbols-outlined text-lg">arrow_outward</span>`;
     }
 }
 
