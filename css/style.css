@@ -11,8 +11,9 @@
 }
 
 #wheel {
-    will-change: transform;
-    transform: translateZ(0);
+    will-change: transform; 
+    transform: rotate(0deg) translateZ(0); 
+    transform-style: preserve-3d;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
