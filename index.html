@@ -50,17 +50,24 @@
 <body class="min-h-screen flex flex-col items-center">
 
     <header class="w-full max-w-6xl py-10 px-6 flex flex-col md:flex-row items-center justify-between gap-8">
-        <div class="absolute top-4 right-4 flex gap-2">
-            <button onclick="setLanguage('pt')" class="text-xs font-bold hover:text-primary transition-colors">PT</button>
-            <span class="text-slate-700">|</span>
-            <button onclick="setLanguage('en')" class="text-xs font-bold hover:text-primary transition-colors">EN</button>
+        <div class="absolute top-4 right-4 flex items-center gap-3">
+            <div class="flex gap-2">
+                <button onclick="setLanguage('pt')">🇧🇷</button>
+                <button onclick="setLanguage('en')">🇺🇸</button>
+            </div>
+
+            <button id="mute-btn" class="w-10 h-10 flex items-center justify-center rounded-xl bg-[#16161e] border border-white/10 hover:border-primary/50 transition-all shadow-lg group">
+                <span id="mute-icon" class="material-symbols-outlined text-white text-xl group-hover:text-primary transition-colors">
+                    volume_up
+                </span>
+            </button>
         </div>
         
         <div class="flex-shrink-0 min-w-fit">
-            <h1 class="text-3xl font-black text-white tracking-tighter italic leading-none whitespace-nowrap">
+            <h1 data-i18n="title" class="text-3xl font-black text-white tracking-tighter italic leading-none whitespace-nowrap">
                 ANIME ROULETTE
             </h1>
-            <p class="text-slate-500 text-sm font-bold uppercase tracking-widest mt-1 whitespace-nowrap">
+            <p data-i18n="subtitle" class="text-slate-500 text-sm font-bold uppercase tracking-widest mt-1 whitespace-nowrap">
                 Descubra seu próximo anime
             </p>
         </div>
@@ -69,7 +76,7 @@
             
             <div class="flex flex-col gap-1">
                 <div class="flex items-center gap-1.5 ml-1">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Usuário</label>
+                    <label data-i18n="userLabel" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Usuário</label>
                     <div class="group relative flex items-center">
                         <span class="material-symbols-outlined text-primary/80 text-[16px] cursor-help hover:text-primary transition-colors">help</span>
                         <div class="absolute top-full left-0 mt-2 w-64 p-3 bg-[#1e1e2e] border border-white/10 rounded-xl text-[11px] leading-relaxed text-slate-300 shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-all z-50 normal-case tracking-normal transform -translate-y-2 group-hover:translate-y-0">
@@ -85,46 +92,48 @@
             </div>
 
             <div class="flex flex-col gap-1">
-                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Origem</label>
+                <label data-i18n="sourceLabel" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Origem</label>
                 <select id="source-filter" class="custom-select w-full md:w-56 h-[42px]">
-                    <option value="all">Todos</option>
-                    <option value="PLANNING">Minha Lista (Planning)</option>
+                    <option value="all" data-i18n="sourceGlobal">Todos</option>
+                    <option value="PLANNING" data-i18n="sourcePlanning">Minha Lista (Planning)</option>
                 </select>
             </div>
 
             <div class="flex flex-col gap-1">
-                <label id="label-genre" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1"></label>
-                <select id="genre-filter" class="custom-select w-full md:w-44 h-[42px]"></select>
+                <label id="label-genre" data-i18n="genreLabel" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Gênero</label>
+                <select id="genre-filter" class="custom-select w-full md:w-44 h-[42px]">
+                    <option value="" data-i18n="genres.all">Todos</option>
+                    <option value="Action" data-i18n="genres.action">Ação</option>
+                    <option value="Adventure" data-i18n="genres.adventure">Aventura</option>
+                    <option value="Comedy" data-i18n="genres.comedy">Comédia</option>
+                    <option value="Drama" data-i18n="genres.drama">Drama</option>
+                    <option value="Romance" data-i18n="genres.romance">Romance</option>
+                    <option value="Fantasy" data-i18n="genres.fantasy">Fantasia</option>
+                    <option value="Sci-Fi" data-i18n="genres.scifi">Ficção Científica</option>
+                    <option value="Horror" data-i18n="genres.horror">Terror</option>
+                    <option value="Mystery" data-i18n="genres.mystery">Mistério</option>
+                    <option value="Slice of Life" data-i18n="genres.slice">Slice of Life</option>
+                    <option value="Thriller" data-i18n="genres.thriller">Suspense</option>
+                    <option value="Supernatural" data-i18n="genres.supernatural">Sobrenatural</option>
+                </select>
             </div>
 
             <div class="flex items-center gap-2">
                 <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Nota Mín.</label>
+                    <label data-i18n="scoreMin" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Nota Mín.</label>
                     <select id="score-min" class="custom-select w-24 h-[42px]">
-                        <option value="1">1.0</option>
-                        <option value="2">2.0</option>
-                        <option value="3">3.0</option>
-                        <option value="4">4.0</option>
-                        <option value="5">5.0</option>
-                        <option value="6">6.0</option>
-                        <option value="7">7.0</option>
-                        <option value="8">8.0</option>
-                        <option value="9">9.0</option>
+                        <option value="1">1.0</option><option value="2">2.0</option><option value="3">3.0</option>
+                        <option value="4">4.0</option><option value="5">5.0</option><option value="6">6.0</option>
+                        <option value="7">7.0</option><option value="8">8.0</option><option value="9">9.0</option>
                     </select>
                 </div>
                 <span class="text-slate-500 mt-4">➔</span>
                 <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Nota Máx.</label>
+                    <label data-i18n="scoreMax" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Nota Máx.</label>
                     <select id="score-max" class="custom-select w-24 h-[42px]">
-                        <option value="10">10.0</option>
-                        <option value="9">9.0</option>
-                        <option value="8">8.0</option>
-                        <option value="7">7.0</option>
-                        <option value="6">6.0</option>
-                        <option value="5">5.0</option>
-                        <option value="4">4.0</option>
-                        <option value="3">3.0</option>
-                        <option value="2">2.0</option>
+                        <option value="10">10.0</option><option value="9">9.0</option><option value="8">8.0</option>
+                        <option value="7">7.0</option><option value="6">6.0</option><option value="5">5.0</option>
+                        <option value="4">4.0</option><option value="3">3.0</option><option value="2">2.0</option>
                         <option value="1">1.0</option>
                     </select>
                 </div>
@@ -143,13 +152,10 @@
     </header>
 
     <main class="w-full max-w-6xl flex-1 flex flex-col lg:flex-row items-center justify-center gap-12 p-6 mb-10">
-
         <div class="relative group">
             <div class="absolute inset-0 bg-primary/20 blur-[100px] rounded-full"></div>
-            <div
-                class="relative size-80 sm:size-[450px] glassmorphism rounded-full p-4 sm:p-6 flex items-center justify-center shadow-2xl">
-                <div id="wheel"
-                    class="size-full rounded-full border-[6px] border-white/10 roulette-gradient relative shadow-inner transition-transform duration-[4000ms] cubic-bezier(0.15, 0, 0.15, 1)">
+            <div class="relative size-80 sm:size-[450px] glassmorphism rounded-full p-4 sm:p-6 flex items-center justify-center shadow-2xl">
+                <div id="wheel" class="size-full rounded-full border-[6px] border-white/10 roulette-gradient relative shadow-inner transition-transform duration-[4000ms] cubic-bezier(0.15, 0, 0.15, 1)">
                     <div class="absolute inset-0 flex items-center justify-center overflow-hidden rounded-full opacity-10">
                         <div class="absolute w-full h-px bg-white rotate-0"></div>
                         <div class="absolute w-full h-px bg-white rotate-45"></div>
@@ -158,7 +164,7 @@
                     </div>
                 </div>
                 <div class="absolute -top-1 left-1/2 -translate-x-1/2 z-30 w-5 h-7 bg-white rounded-b-full shadow-xl"></div>
-                <button id="spin-button"
+                <button id="spin-button" data-i18n="spinBtn"
                     class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-20 sm:size-24 bg-white text-background-dark rounded-full shadow-2xl flex flex-col items-center justify-center z-40 hover:scale-110 active:scale-95 transition-all">
                     <span class="text-[10px] font-black uppercase tracking-widest leading-none">Girar</span>
                     <span class="material-symbols-outlined text-3xl">casino</span>
@@ -167,16 +173,11 @@
         </div>
 
         <div class="w-full max-w-[400px] min-h-fit lg:h-[770px]">
-            <div id="result-card"
-                class="glassmorphism rounded-3xl w-full flex flex-col overflow-hidden shadow-2xl border-white/5 opacity-0 transition-all duration-700 translate-y-10 hidden max-h-[85vh]">
+            <div id="result-card" class="glassmorphism rounded-3xl w-full flex flex-col overflow-hidden shadow-2xl border-white/5 opacity-0 transition-all duration-700 translate-y-10 hidden max-h-[85vh]">
                 
                <div class="relative w-full h-80 sm:h-[400px] shrink-0 overflow-hidden bg-card-dark">
-                    <img id="anime-img-tag" 
-                        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" 
-                        class="absolute inset-0 w-full h-full object-cover z-0">
-                    
+                    <img id="anime-img-tag" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="absolute inset-0 w-full h-full object-cover z-0">
                     <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-transparent z-10"></div>
-                    
                     <div class="absolute top-4 right-4 bg-[#00b894] text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-lg z-20">
                         <span class="material-symbols-outlined text-sm fill-current">star</span>
                         <span id="anime-score">0.0</span>
@@ -185,15 +186,11 @@
 
                 <div class="p-6 flex flex-col flex-1 min-h-0 bg-[#121212]">
                     <h3 id="anime-title" class="text-xl font-bold leading-tight text-white mb-3 break-words">Título</h3>
-                    
-                    <div id="anime-desc"
-                        class="text-sm text-slate-400 leading-relaxed overflow-y-auto custom-scrollbar pr-2 mb-4 flex-1 max-h-[200px] sm:max-h-none">
+                    <div id="anime-desc" class="text-sm text-slate-400 leading-relaxed overflow-y-auto custom-scrollbar pr-2 mb-4 flex-1 max-h-[200px] sm:max-h-none">
                         A sinopse aparecerá aqui.
                     </div>
-
                     <div class="mt-auto pt-2">
-                        <button id="anilist-link"
-                            class="w-full py-4 bg-primary hover:bg-primary-hover text-white rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                        <button id="anilist-link" class="w-full py-4 bg-primary hover:bg-primary-hover text-white rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2">
                             Detalhes no AniList
                             <span class="material-symbols-outlined text-lg">arrow_outward</span>
                         </button>
@@ -202,42 +199,36 @@
             </div>
         </div>
     </main>
+
     <section id="history-section" class="w-full max-w-6xl px-6 py-10 border-t border-white/5 mx-auto mb-20">
         <div class="flex items-center gap-2 mb-8">
             <span class="material-symbols-outlined text-primary">history</span>
-            <h2 class="text-xl font-bold text-white uppercase tracking-widest">Sorteios Recentes</h2>
-
+            <h2 data-i18n="historyTitle" class="text-xl font-bold text-white uppercase tracking-widest">Sorteios Recentes</h2>
             <button id="clear-history" class="text-xs font-bold text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1 uppercase tracking-widest">
                 <span class="material-symbols-outlined text-sm">delete_sweep</span>
                 Limpar
              </button>
-
         </div>
-        <div id="history-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        </div>
+        <div id="history-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
     </section>
+
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script type="module" src="./js/main.js"></script>
     
     <div id="custom-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-    
-    <div class="relative w-full max-w-sm glassmorphism rounded-3xl p-8 shadow-2xl border-white/10 scale-95 transition-all">
-        <div class="flex flex-col items-center text-center">
-            <div class="size-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-6 text-primary">
-                <span class="material-symbols-outlined text-4xl">warning</span>
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div class="relative w-full max-w-sm glassmorphism rounded-3xl p-8 shadow-2xl border-white/10 scale-95 transition-all">
+            <div class="flex flex-col items-center text-center">
+                <div class="size-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-6 text-primary">
+                    <span class="material-symbols-outlined text-4xl">warning</span>
+                </div>
+                <h2 id="modal-title" class="text-xl font-bold text-white mb-2">Ops! Algo deu errado</h2>
+                <p id="modal-message" class="text-slate-400 text-sm leading-relaxed mb-8">Mensagem de erro aqui.</p>
+                <button onclick="closeModal()" class="w-full py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-primary/20">
+                    Entendido
+                </button>
             </div>
-            <h2 id="modal-title" class="text-xl font-bold text-white mb-2">Ops! Algo deu errado</h2>
-            <p id="modal-message" class="text-slate-400 text-sm leading-relaxed mb-8">
-                Mensagem de erro aqui.
-            </p>
-            <button onclick="closeModal()" class="w-full py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-primary/20">
-                Entendido
-            </button>
         </div>
     </div>
-</div>
 </body>
-
 </html>
-

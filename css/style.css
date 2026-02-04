@@ -30,11 +30,19 @@
     transition: filter 0.5s ease;
 }
 
+.wheel-glow {
+    animation: success-glow 2s infinite ease-in-out;
+    border: 4px solid rgba(139, 92, 246, 0.8) !important;
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+    transition: all 0.5s ease;
+}
+
 #anime-desc {
     display: block !important;
-    max-height: 150px !important; 
+    max-height: 180px !important; 
     overflow-y: auto !important; 
     -webkit-overflow-scrolling: touch;
+    padding-right: 8px;
 }
 
 .nsfw-container {
@@ -94,8 +102,3 @@
 
 input:checked + .slider { background-color: #8b5cf6; }
 input:checked + .slider:before { transform: translateX(18px); }
-
-@media (min-width: 640px) {
-    #result-card { max-height: none !important; height: auto !important; }
-    #anime-desc { max-height: none !important; overflow-y: visible !important; }
-}
