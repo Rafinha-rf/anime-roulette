@@ -10,6 +10,14 @@
     background: conic-gradient(#8b5cf6 0deg 45deg, #a78bfa 45deg 90deg, #1e1e2e 90deg 135deg, #00b894 135deg 180deg, #8b5cf6 180deg 225deg, #fd79a8 225deg 270deg, #0984e3 270deg 315deg, #fdcb6e 315deg 360deg);
 }
 
+#wheel {
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+}
+
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
@@ -24,6 +32,7 @@
     animation: success-glow 2s infinite ease-in-out;
     border: 1px solid rgba(139, 92, 246, 0.5) !important;
 }
+
 
 .wheel-flash {
     filter: brightness(1.5) contrast(1.2);

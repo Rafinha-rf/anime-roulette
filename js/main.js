@@ -78,16 +78,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function atualizarEstadoAudio() {
         somGiro.muted = isMuted;
-        muteIcon.innerText = isMuted ? 'volume_off' : 'volume_up';
-        muteBtn.classList.toggle('text-slate-500', isMuted);
+        if (muteIcon) muteIcon.innerText = isMuted ? 'volume_off' : 'volume_up';
+        if (muteBtn) muteBtn.classList.toggle('text-slate-500', isMuted);
     }
+    
     atualizarEstadoAudio();
 
-    muteBtn.addEventListener('click', () => {
-        isMuted = !isMuted;
-        localStorage.setItem('audio_muted', isMuted);
-        atualizarEstadoAudio();
-    });
+    if (muteBtn) {
+        muteBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            localStorage.setItem('audio_muted', isMuted);
+            atualizarEstadoAudio();
+        });
+    }
 
 
     const nsfwSwitch = document.getElementById('nsfw-filter');
@@ -99,11 +102,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const userFilter = document.getElementById('user-filter');
+    let debounceTimer;
     if (userFilter) {
         userFilter.addEventListener('input', (e) => {
-            if (e.target.value.trim() === "") {
-                localStorage.removeItem('cache_busca_global');
-            }
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                if (e.target.value.trim() === "") {
+                    localStorage.removeItem('cache_busca_global');
+                }
+            }, 500);
         });
     }
 
@@ -138,8 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        wheel.classList.remove('wheel-glow');
-        wheel.classList.remove('wheel-flash');
+        wheel.classList.remove('wheel-glow', 'wheel-flash');
 
         const imgPreloader = new Image();
         imgPreloader.src = anime.coverImage.extraLarge;
@@ -157,8 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setTimeout(() => {
                 somGiro.pause();
-                wheel.classList.add('wheel-glow');
-                wheel.classList.add('wheel-flash');
+                wheel.classList.add('wheel-glow', 'wheel-flash');
                 
                 atualizarInterface(anime);
                 salvarNoHistorico(anime);
@@ -217,7 +222,7 @@ function renderizarHistorico() {
 
 function salvarNoHistorico(anime) {
     let historico = JSON.parse(localStorage.getItem('anime_history')) || [];
-    const novoItem = { id: anime.id, title: anime.title.romaji, cover: anime.coverImage.extraLarge, url: anime.siteUrl, score: (anime.averageScore / 10).toFixed(1) };
+    const novoItem = { id: anime.id, title: anime.title.romaji, cover: anime.coverImage.large, url: anime.siteUrl, score: (anime.averageScore / 10).toFixed(1) };
     historico = [novoItem, ...historico.filter(item => item.id !== anime.id)].slice(0, 5);
     localStorage.setItem('anime_history', JSON.stringify(historico));
     renderizarHistorico();
