@@ -35,7 +35,7 @@
 
         @layer components {
             .custom-select {
-                @apply appearance-none bg-[#16161e] border border-white/10 rounded-xl px-4 py-2 pr-10 text-sm outline-none focus:ring-1 focus:ring-primary text-slate-200 cursor-pointer;
+                @apply appearance-none bg-[#16161e] border border-white/10 rounded-xl px-4 py-2 pr-10 text-sm outline-none focus:ring-1 focus:ring-primary text-slate-200 cursor-pointer transition-all duration-300;
                 background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
                 background-repeat: no-repeat;
                 background-position: right 0.75rem center;
@@ -57,10 +57,8 @@
                 <button onclick="setLanguage('en')">🇺🇸</button>
             </div>
 
-            <button id="mute-btn" class="w-10 h-10 flex items-center justify-center rounded-xl bg-[#16161e] border border-white/10 hover:border-primary/50 transition-all shadow-lg group">
-                <span id="mute-icon" class="material-symbols-outlined text-white text-xl group-hover:text-primary transition-colors">
-                    volume_up
-                </span>
+            <button id="mute-btn" class="fixed bottom-6 right-6 z-50 bg-[#16161e]/90 backdrop-blur-md border border-primary/50 p-3 rounded-full hover:border-primary hover:bg-primary/10 transition-all shadow-xl flex items-center justify-center group">
+                <span id="mute-icon" class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">volume_up</span>
             </button>
         </div>
         
@@ -81,13 +79,13 @@
                     <div class="group relative flex items-center">
                         <span class="material-symbols-outlined text-primary/80 text-[16px] cursor-help hover:text-primary transition-colors">help</span>
                         <div class="absolute top-full left-0 mt-2 w-64 p-3 bg-[#1e1e2e] border border-white/10 rounded-xl text-[11px] leading-relaxed text-slate-300 shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-all z-50 normal-case tracking-normal transform -translate-y-2 group-hover:translate-y-0">
-                            <p id="user-help-text" class="m-0"></p>
+                            <p data-i18n="userHelp" id="user-help-text" class="m-0"></p>
                             <div class="absolute bottom-full left-1.5 border-4 border-transparent border-b-[#1e1e2e]"></div>
                         </div>
                     </div>
                 </div>
                 <div class="relative">
-                    <input type="text" id="user-filter" placeholder="Nick AniList"
+                    <input data-i18n="" type="text" id="user-filter" placeholder="Nick AniList"
                         class="bg-[#16161e] border border-white/10 rounded-xl px-4 py-2 text-base outline-none focus:ring-1 focus:ring-primary w-full md:w-56 h-[42px] placeholder:text-slate-600">
                 </div>
             </div>
@@ -140,6 +138,16 @@
                 </div>
             </div>
 
+            <div class="flex flex-col gap-1">
+                <label data-i18n="countryLabel" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">País</label>
+                <select id="country-filter" class="custom-select w-44 h-[42px]">
+                    <option value="" data-i18n="countryAll">Todos</option>
+                    <option value="JP" data-i18n="countryJP">Japão (Anime)</option>
+                    <option value="CN" data-i18n="countryCN">China (Donghua)</option>
+                    <option value="KR" data-i18n="countryKR">Coreia (Aeni)</option>
+                </select>
+            </div>
+
             <div class="w-full md:w-auto" >
                 <div class="nsfw-container !m-0 !max-w-none md:!max-w-[280px] gap-4">
                     <span class="nsfw-text" data-i18n="nsfwFilter">Esconder conteúdo adulto</span>
@@ -152,11 +160,12 @@
         </div>
     </header>
 
-    <main class="w-full max-w-6xl flex-1 flex flex-col lg:flex-row items-center justify-center gap-12 p-6 mb-10">
-        <div class="relative group">
+    <main class="w-full max-w-7xl flex-1 flex flex-col lg:flex-row items-center lg:items-center justify-center gap-12 p-6 mb-10 mx-auto">
+
+        <div class="relative group flex-shrink-0">
             <div class="absolute inset-0 bg-primary/20 blur-[100px] rounded-full"></div>
-            <div class="relative size-80 sm:size-[450px] glassmorphism rounded-full p-4 sm:p-6 flex items-center justify-center shadow-2xl">
-                <div id="wheel" class="size-full rounded-full border-[6px] border-white/10 roulette-gradient relative shadow-inner transition-transform duration-[4000ms] cubic-bezier(0.15, 0, 0.15, 1)">
+            <div class="relative size-72 sm:size-[450px] glassmorphism rounded-full p-4 sm:p-6 flex items-center justify-center shadow-2xl">
+                <div id="wheel" class="size-full rounded-full border-[6px] border-white/10 roulette-gradient relative shadow-inner transition-transform duration-[4000ms] cubic-bezier(0.15, 0, 0.15, 1)" style="transform: rotate(0deg) translateZ(0);">
                     <div class="absolute inset-0 flex items-center justify-center overflow-hidden rounded-full opacity-10">
                         <div class="absolute w-full h-px bg-white rotate-0"></div>
                         <div class="absolute w-full h-px bg-white rotate-45"></div>
@@ -165,37 +174,34 @@
                     </div>
                 </div>
                 <div class="absolute -top-1 left-1/2 -translate-x-1/2 z-30 w-5 h-7 bg-white rounded-b-full shadow-xl"></div>
-                <button id="spin-button" data-i18n="spinBtn"
-                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-20 sm:size-24 bg-white text-background-dark rounded-full shadow-2xl flex flex-col items-center justify-center z-40 hover:scale-110 active:scale-95 transition-all">
-                    <span class="text-[10px] font-black uppercase tracking-widest leading-none">Girar</span>
+                <button id="spin-button" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-20 sm:size-24 bg-white text-background-dark rounded-full shadow-2xl flex flex-col items-center justify-center z-40 hover:scale-110 active:scale-95 transition-all">
+                    <span data-i18n="spinBtn" class="text-[10px] font-black uppercase tracking-widest leading-none">Girar</span>
                     <span class="material-symbols-outlined text-3xl">casino</span>
                 </button>
             </div>
         </div>
 
-        <div class="w-full max-w-[400px] min-h-fit lg:h-[770px]">
-            <div id="result-card" class="glassmorphism rounded-3xl w-full flex flex-col overflow-hidden shadow-2xl border-white/5 opacity-0 transition-all duration-700 translate-y-10 hidden max-h-[85vh]">
+        <div class="w-full lg:max-w-[850px] min-h-[400px] flex items-center">
+            <div id="result-card" class="hidden glassmorphism flex flex-col md:flex-row items-stretch overflow-hidden rounded-3xl border border-white/10 shadow-2xl transition-all duration-700 w-full">
                 
-               <div class="relative w-full h-80 sm:h-[400px] shrink-0 overflow-hidden bg-card-dark">
-                    <img id="anime-img-tag" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="absolute inset-0 w-full h-full object-cover z-0">
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-transparent z-10"></div>
-                    <div class="absolute top-4 right-4 bg-[#00b894] text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-lg z-20">
-                        <span class="material-symbols-outlined text-sm fill-current">star</span>
-                        <span id="anime-score">0.0</span>
-                    </div>
-                </div>
+                <img id="anime-img-tag" src="" alt="Cover" class="w-full md:w-[300px] h-[350px] md:h-auto object-cover flex-shrink-0">
 
-                <div class="p-6 flex flex-col flex-1 min-h-0 bg-[#121212]">
-                    <h3 id="anime-title" class="text-xl font-bold leading-tight text-white mb-3 break-words">Título</h3>
-                    <div id="anime-desc" class="text-sm text-slate-400 leading-relaxed overflow-y-auto custom-scrollbar pr-2 mb-4 flex-1 max-h-[200px] sm:max-h-none">
-                        A sinopse aparecerá aqui.
+                <div class="p-6 md:p-10 flex flex-col flex-1 min-w-0 bg-gradient-to-br from-white/[0.02] to-transparent">
+                    <h2 id="anime-title" class="text-xl md:text-3xl font-black text-white mb-4 break-words leading-tight"></h2>
+                    
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1">
+                            <span class="material-symbols-outlined text-xs fill-current">star</span>
+                            <span id="anime-score"></span>
+                        </span>
                     </div>
-                    <div class="mt-auto pt-2">
-                        <button id="anilist-link" class="w-full py-4 bg-primary hover:bg-primary-hover text-white rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2">
-                            Detalhes no AniList
-                            <span class="material-symbols-outlined text-lg">arrow_outward</span>
-                        </button>
-                    </div>
+
+                    <p id="anime-desc" class="custom-scrollbar text-slate-300 text-sm md:text-base leading-relaxed mb-6 overflow-y-auto max-h-[150px] md:max-h-[250px]">
+                    </p>
+                    <button id="anilist-link" class="mt-auto w-full bg-primary hover:bg-[#7c3aed] text-white py-4 rounded-2xl transition-all flex items-center justify-center gap-2 font-bold group shadow-lg shadow-primary/20 active:scale-[0.98]">
+                        <span data-i18n="detailsBtn">Ver Detalhes</span>
+                        <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_outward</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -206,9 +212,9 @@
             <span class="material-symbols-outlined text-primary">history</span>
             <h2 data-i18n="historyTitle" class="text-xl font-bold text-white uppercase tracking-widest">Sorteios Recentes</h2>
             <button id="clear-history" class="text-xs font-bold text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1 uppercase tracking-widest">
-                <span class="material-symbols-outlined text-sm">delete_sweep</span>
-                Limpar
-             </button>
+                <span class="material-symbols-outlined text-sm">delete_sweep</span> 
+                <span data-i18n="clearHistory">Limpar</span>
+            </button>
         </div>
         <div id="history-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
     </section>

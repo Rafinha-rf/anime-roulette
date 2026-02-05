@@ -28,36 +28,12 @@ function applyLanguage(lang) {
 
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const path = el.getAttribute('data-i18n');
-        
-       
         const translation = path.split('.').reduce((obj, key) => obj && obj[key], t);
 
         if (translation) {
-            if (el.id === 'spin-button' && el.querySelector('span')) {
-                el.querySelector('span').innerText = translation;
-            } else {
-                el.innerText = translation;
-            }
+            el.innerText = translation;
         }
     });
-
-    const userFilter = document.getElementById('user-filter');
-    if (userFilter) {
-        userFilter.placeholder = lang === 'pt' ? 'Nick AniList' : 'AniList Nick';
-    }
-
-    const helpText = document.getElementById('user-help-text');
-    if (helpText) helpText.innerText = t.userHelp;
-
-    const clearBtn = document.getElementById('clear-history');
-    if (clearBtn) {
-        clearBtn.innerHTML = `<span class="material-symbols-outlined text-sm">delete_sweep</span> ${t.clearHistory}`;
-    }
-
-    const detailsBtn = document.getElementById('anilist-link');
-    if (detailsBtn) {
-        detailsBtn.innerHTML = `${t.detailsBtn} <span class="material-symbols-outlined text-lg">arrow_outward</span>`;
-    }
 
     const sourceSelect = document.getElementById('source-filter');
     if (sourceSelect && sourceSelect.options.length >= 2) {
@@ -77,9 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let isMuted = localStorage.getItem('audio_muted') === 'true';
 
     function atualizarEstadoAudio() {
-        somGiro.muted = isMuted;
-        if (muteIcon) muteIcon.innerText = isMuted ? 'volume_off' : 'volume_up';
-        if (muteBtn) muteBtn.classList.toggle('text-slate-500', isMuted);
+    somGiro.muted = isMuted;
+    if (muteIcon) {
+        muteIcon.innerText = isMuted ? 'volume_off' : 'volume_up';
+        muteIcon.className = `material-symbols-outlined transition-colors ${isMuted ? 'text-slate-500' : 'text-primary'}`;
+    }
+    if (muteBtn) {
+        muteBtn.style.borderColor = isMuted ? 'rgba(255,255,255,0.1)' : 'rgba(139,92,246,0.5)';
+        }
     }
     
     atualizarEstadoAudio();
@@ -92,12 +73,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const countryFilter = document.getElementById('country-filter');
+    if (countryFilter) {
+        countryFilter.addEventListener('change', () => {
+            localStorage.removeItem('cache_busca_global');
+        });
+    }
 
     const nsfwSwitch = document.getElementById('nsfw-filter');
     if (nsfwSwitch) {
         nsfwSwitch.addEventListener('change', () => {
             localStorage.removeItem('cache_busca_global');
-            console.log("Filtro NSFW alterado: Cache limpo.");
         });
     }
 
@@ -126,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const sMin = document.getElementById('score-min').value;
         const sMax = document.getElementById('score-max').value;
         const genero = document.getElementById('genre-filter').value;
+        resultCard.classList.add('hidden');
 
         if (parseInt(sMin) > parseInt(sMax)) {
             window.openModal(t.errorFilterTitle, t.errorFilterMsg);
@@ -211,7 +198,7 @@ function renderizarHistorico() {
         <a href="${anime.url}" target="_blank" class="group relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/5 bg-[#16161e] hover:border-primary/50 transition-all shadow-2xl">
             <img src="${anime.cover}" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity">
             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-            <div class="absolute top-3 right-3 bg-[#00b894] text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg">
+            <div class="absolute top-3 right-3 bg-primary/85 text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg">
                 <span class="material-symbols-outlined text-xs fill-current">star</span> ${anime.score}
             </div>
             <div class="absolute bottom-4 left-4 right-4">

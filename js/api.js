@@ -4,27 +4,46 @@ import { translations } from './languages.js';
 const CACHE_EXPIRATION_MS = 10 * 60 * 1000;
 const GLOBAL_CACHE_KEY = 'cache_busca_global';
 
-async function obterDadosUsuarioIndividual(userName) {
-    // Mantemos a busca leve buscando apenas os IDs
-    const query = `query ($userName: String) { MediaListCollection(userName: $userName, type: ANIME) { lists { status entries { mediaId } } } }`;
+async function obterDadosUsuarioIndividual(nome) {
+    const query =`query ($userName: String) {
+        MediaListCollection(userName: $userName, type: ANIME) {
+            lists {
+                status
+                entries {
+                    mediaId
+                    media { countryOfOrigin }
+                }
+            }
+        }
+    }`;
+
     try {
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query, variables: { userName } })
+            body: JSON.stringify({ query, variables: { userName: nome } })
         });
-        const data = await response.json();
-        if (data.errors || !data.data?.MediaListCollection) return null;
 
-        const planningIds = [];
-        const todosIdsNaLista = [];
-        data.data.MediaListCollection.lists.forEach(list => {
-            list.entries.forEach(entry => {
-                todosIdsNaLista.push(entry.mediaId);
-                if (list.status === "PLANNING") planningIds.push(entry.mediaId);
+        const data = await response.json();
+        if (!data.data) return null;
+
+        const dados = { planning: [], todos: [] };
+
+        data.data.MediaListCollection.lists.forEach(lista => {
+            lista.entries.forEach(entry => {
+                const info = { 
+                    id: entry.mediaId, 
+                    country: entry.media.countryOfOrigin 
+                };
+                
+                dados.todos.push(info);
+                if (lista.status === 'PLANNING') {
+                    dados.planning.push(info);
+                }
             });
         });
-        return { planning: planningIds, todos: todosIdsNaLista };
+
+        return dados;
     } catch (e) { return null; }
 }
 
@@ -56,9 +75,18 @@ async function obterListasMultiplosUsuarios(inputNomes) {
         todosCombinados = [...todosCombinados, ...dados.todos];
     }
 
+    const removerDuplicados = (arr) => {
+        const uniqueIds = new Set();
+        return arr.filter(item => {
+            if (uniqueIds.has(item.id)) return false;
+            uniqueIds.add(item.id);
+            return true;
+        });
+    };
+
     const resultadoFinal = { 
-        planning: [...new Set(planningCombinado)], 
-        todos: [...new Set(todosCombinados)] 
+        planning: removerDuplicados(planningCombinado), 
+        todos: removerDuplicados(todosCombinados) 
     };
 
     try {
@@ -81,18 +109,24 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
     const usuarioInput = document.getElementById('user-filter').value.trim();
     const origem = document.getElementById('source-filter')?.value || 'all';
     const esconderAdulto = document.getElementById('nsfw-filter')?.checked ?? true;
+    const paisAtual = document.getElementById('country-filter')?.value || undefined;
 
     if (tentativas > 5) {
         window.openModal(t.errorNotFoundTitle, t.errorNotFoundMsg);
         return null;
     }
 
-    // Otimização: Cache Global respeita o filtro NSFW agora
     if (usuarioInput === "") {
         const cachedGlobal = localStorage.getItem(GLOBAL_CACHE_KEY);
         if (cachedGlobal) {
             const { timestamp, data, filters } = JSON.parse(cachedGlobal);
-            const mesmosFiltros = filters.genre === genero && filters.min === scoreMin && filters.max === scoreMax && filters.nsfw === esconderAdulto;
+            const mesmosFiltros = 
+                filters.genre === genero && 
+                filters.min === scoreMin && 
+                filters.max === scoreMax && 
+                filters.nsfw === esconderAdulto && 
+                filters.country === paisAtual;
+
             if (mesmosFiltros && (Date.now() - timestamp < 5 * 60 * 1000)) {
                 return data[Math.floor(Math.random() * data.length)];
             }
@@ -101,21 +135,32 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
 
     let includeIds = null;
     let excludeIds = null;
-    let listaCompletaJaVistos = [];
+    let listaCompletaJaVistosIds = [];
 
     if (usuarioInput !== "") {
         const listas = await obterListasMultiplosUsuarios(usuarioInput);
         if (!listas) return "USER_ERROR";
-        listaCompletaJaVistos = listas.todos || [];
+
+        listaCompletaJaVistosIds = listas.todos.map(item => item.id);
 
         if (origem === "PLANNING") {
-            if (!listas.planning || listas.planning.length === 0) {
+            const planningFiltrado = listas.planning
+                .filter(item => !paisAtual || item.country === paisAtual)
+                .map(item => item.id);
+
+            if (planningFiltrado.length === 0) {
                 window.openModal(t.errorEmptyListTitle, t.errorEmptyListMsg);
                 return "USER_ERROR";
             }
-            includeIds = listas.planning.sort(() => 0.5 - Math.random()).slice(0, 50);
-        } else { 
-            excludeIds = listaCompletaJaVistos.slice(0, 100); 
+            
+            includeIds = planningFiltrado.sort(() => 0.5 - Math.random()).slice(0, 50);
+        } else {
+            const idsParaIgnorarNoServidor = listas.todos
+                .filter(item => !paisAtual || item.country === paisAtual)
+                .map(item => item.id)
+                .slice(0, 100);
+
+            excludeIds = idsParaIgnorarNoServidor.length > 0 ? idsParaIgnorarNoServidor : undefined;
         }
     }
 
@@ -123,10 +168,9 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
     const paginaInicial = (includeIds || notaMuitoAlta) ? 1 : Math.floor(Math.random() * 5) + 1;
     const paginaFinal = paginaInicial + tentativas;
 
-    // Otimização de Performance: Solicitamos 'large' para o Histórico (mais leve)
-    const query = `query ($page: Int, $genre: String, $min: Int, $max: Int, $in: [Int], $notIn: [Int], $isAdult: Boolean) {
+    const query = `query ($page: Int, $genre: String, $min: Int, $max: Int, $in: [Int], $notIn: [Int], $isAdult: Boolean, $country: CountryCode) {
         Page(page: $page, perPage: 50) {
-            media(genre: $genre, averageScore_greater: $min, averageScore_lesser: $max, id_in: $in, id_not_in: $notIn, isAdult: $isAdult, type: ANIME, sort: ID_DESC, format_not_in: [MUSIC]) {
+            media(genre: $genre, averageScore_greater: $min, averageScore_lesser: $max, id_in: $in, id_not_in: $notIn, isAdult: $isAdult, countryOfOrigin: $country, type: ANIME, sort: ID_DESC, format_not_in: [MUSIC]) {
                 id title { romaji } description coverImage { extraLarge large } averageScore siteUrl
             }
         }
@@ -137,7 +181,8 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
         genre: genero || undefined,
         min: parseInt(scoreMin) * 10,
         max: parseInt(scoreMax) * 10,
-        isAdult: esconderAdulto ? false : undefined
+        isAdult: esconderAdulto ? false : undefined,
+        country: paisAtual
     };
 
     if (includeIds) variables.in = includeIds;
@@ -153,23 +198,40 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
         const data = await response.json();
         if (data.errors) return "USER_ERROR"; 
 
-        const listaBruta = data.data?.Page?.media || [];
+        let listaBruta = data.data?.Page?.media || [];
+
+        if (listaBruta.length === 0 && variables.genre && (paisAtual === 'CN' || paisAtual === 'KR')) {
+            const fallbackVariables = { ...variables };
+            delete fallbackVariables.genre;
+            
+            const responseFallback = await fetch(url, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ query, variables: fallbackVariables }) 
+            });
+            const dataFallback = await responseFallback.json();
+            listaBruta = dataFallback.data?.Page?.media || [];
+        }
 
         if (listaBruta.length === 0) {
-            if (tentativas < 5 && !includeIds) return buscarAnime(genero, scoreMin, scoreMax, tentativas + 1);
+            if (tentativas < 5 && !includeIds) {
+                return await buscarAnime(genero, scoreMin, scoreMax, tentativas + 1);
+            }
             window.openModal(t.errorNotFoundTitle, t.errorNotFoundMsg);
             return null;
         }
 
         let listaFiltrada = listaBruta.filter(anime => {
-            const notaMinimaReal = parseInt(scoreMin) * 10;
-            return (anime.averageScore || 0) >= notaMinimaReal && !listaCompletaJaVistos.includes(anime.id);
+            const notaMinimaReal = listaBruta.length < 5 ? 0 : parseInt(scoreMin) * 10;
+            return (anime.averageScore || 0) >= notaMinimaReal && !listaCompletaJaVistosIds.includes(anime.id);
         });
 
         if (listaFiltrada.length === 0) {
-            if (includeIds) listaFiltrada = listaBruta;
-            else if (tentativas < 5) return buscarAnime(genero, scoreMin, scoreMax, tentativas + 1);
-            else {
+            if (includeIds) {
+                listaFiltrada = listaBruta;
+            } else if (tentativas < 5) {
+                return await buscarAnime(genero, scoreMin, scoreMax, tentativas + 1);
+            } else {
                 window.openModal(t.errorNotFoundTitle, t.errorNotFoundMsg);
                 return null;
             }
@@ -178,7 +240,7 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
         if (usuarioInput === "") {
             localStorage.setItem(GLOBAL_CACHE_KEY, JSON.stringify({
                 timestamp: Date.now(),
-                filters: { genre: genero, min: scoreMin, max: scoreMax, nsfw: esconderAdulto },
+                filters: { genre: genero, min: scoreMin, max: scoreMax, nsfw: esconderAdulto, country: paisAtual || "" },
                 data: listaFiltrada
             }));
         }
@@ -190,9 +252,11 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
 
 export function atualizarInterface(anime) {
     if (!anime) return;
+    
     const imgTag = document.getElementById('anime-img-tag');
-    // Otimização: usa a maior imagem para o card principal
-    if (imgTag && anime.coverImage) imgTag.src = anime.coverImage.extraLarge || anime.coverImage.large;
+    if (imgTag && anime.coverImage) {
+        imgTag.src = anime.coverImage.extraLarge || anime.coverImage.large;
+    }
 
     document.getElementById('anime-title').innerText = anime.title.romaji;
     document.getElementById('anime-score').innerText = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : "0.0";
@@ -201,15 +265,25 @@ export function atualizarInterface(anime) {
     desc.innerText = anime.description ? anime.description.replace(/<[^>]*>?/gm, '') : "";
     desc.scrollTop = 0;
     
-    document.getElementById('anilist-link').onclick = () => window.open(anime.siteUrl, '_blank');
+    const detailsBtn = document.getElementById('anilist-link');
+    
+    detailsBtn.classList.add('animate-pulse-purple');
+    detailsBtn.onclick = () => {
+        detailsBtn.classList.remove('animate-pulse-purple');
+        window.open(anime.siteUrl, '_blank');
+    };
 
     const resultCard = document.getElementById('result-card');
-    resultCard.classList.remove('hidden');
-    resultCard.style.display = 'flex';
     
-    // Otimização de Renderização: Forçamos o fluxo da GPU
+    resultCard.style.display = 'flex';
+    resultCard.classList.remove('hidden');
+    
+    resultCard.classList.add('opacity-0', 'translate-y-10');
+
     requestAnimationFrame(() => {
-        resultCard.classList.remove('opacity-0', 'translate-y-10');
-        resultCard.classList.add('opacity-100', 'translate-y-0', 'animate-glow');
+        setTimeout(() => {
+            resultCard.classList.remove('opacity-0', 'translate-y-10');
+            resultCard.classList.add('opacity-100', 'translate-y-0', 'animate-glow');
+        }, 10);
     });
 }

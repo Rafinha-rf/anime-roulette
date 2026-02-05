@@ -1,5 +1,15 @@
 /* style.css */
 
+@keyframes pulse-purple {
+    0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(139, 92, 246, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+
+.animate-pulse-purple {
+    animation: pulse-purple 2s infinite;
+}
+
 .glassmorphism {
     background: rgba(22, 22, 30, 0.7);
     backdrop-filter: blur(16px);
@@ -48,11 +58,9 @@
 }
 
 #anime-desc {
-    display: block !important;
-    max-height: 180px !important; 
-    overflow-y: auto !important; 
+    display: block;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding-right: 8px;
 }
 
 .nsfw-container {
@@ -73,6 +81,7 @@
 
 .nsfw-container:hover {
     border-color: rgba(139, 92, 246, 0.5);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .nsfw-text {
@@ -108,6 +117,11 @@
     background-color: white;
     transition: .4s;
     border-radius: 50%;
+}
+
+.custom-select:hover {
+    border-color: rgba(139, 92, 246, 0.5);
+    @apply bg-[#1c1c27];
 }
 
 input:checked + .slider { background-color: #8b5cf6; }
