@@ -28,9 +28,6 @@ export const translations = {
         spinBtn: "Girar",
         countryLabel: "País",
         countryAll: "Todos",
-        countryJP: "Japão (Anime)",
-        countryCN: "China (Donghua)",
-        countryKR: "Coreia (Aeni)",
         errorNotFoundMsg: "Não encontramos nada com esses filtros. Se estiver buscando China ou Coreia, tente remover o gênero ou baixar a nota mínima!",
         genres: {
             all: "Todos",
@@ -77,9 +74,6 @@ export const translations = {
         spinBtn: "Spin",
         countryLabel: "Country",
         countryAll: "All",
-        countryJP: "Japan (Anime)",
-        countryCN: "China (Donghua)",
-        countryKR: "Korea (Aeni)",
         errorNotFoundMsg: "No results found with these filters. If searching for China or Korea, try removing the genre or lowering the minimum score!",
         genres: {
             all: "All",

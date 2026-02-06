@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="theme-color" content="#0a0a0c">
     <title>Anime Roulette</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -45,62 +46,62 @@
             .custom-select option {
                 @apply bg-[#16161e] text-slate-200;
             }
+            
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
 
-    <header class="w-full max-w-6xl py-10 px-6 flex flex-col md:flex-row items-center justify-between gap-8">
-        <div class="absolute top-4 right-4 flex items-center gap-3">
-            <div class="flex gap-2">
-                <button onclick="setLanguage('pt')">🇧🇷</button>
-                <button onclick="setLanguage('en')">🇺🇸</button>
+<header class="w-full max-w-7xl py-8 px-4 md:px-6 flex flex-col xl:flex-row items-center justify-between gap-6 relative z-50">
+        
+        <div class="absolute top-4 right-4 md:top-6 md:right-6 flex items-center gap-3 z-[100]">
+            
+            <div class="flex gap-2 bg-black/40 backdrop-blur-md p-1.5 rounded-lg border border-white/5 shadow-lg">
+                <button onclick="setLanguage('pt')" class="hover:scale-110 transition-transform opacity-80 hover:opacity-100 grayscale hover:grayscale-0">🇧🇷</button>
+                <button onclick="setLanguage('en')" class="hover:scale-110 transition-transform opacity-80 hover:opacity-100 grayscale hover:grayscale-0">🇺🇸</button>
             </div>
 
             <button id="mute-btn" class="fixed bottom-6 right-6 z-50 bg-[#16161e]/90 backdrop-blur-md border border-primary/50 p-3 rounded-full hover:border-primary hover:bg-primary/10 transition-all shadow-xl flex items-center justify-center group">
-                <span id="mute-icon" class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">volume_up</span>
+                <span id="mute-icon" class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform text-xl">volume_up</span>
             </button>
         </div>
         
-        <div class="flex-shrink-0 min-w-fit">
-            <h1 data-i18n="title" class="text-3xl font-black text-white tracking-tighter italic leading-none whitespace-nowrap">
+        <div class="flex-shrink-0 text-center xl:text-left mt-8 xl:mt-0 min-w-fit relative z-10">
+            <h1 data-i18n="title" class="text-3xl md:text-4xl font-black text-white tracking-tighter italic leading-none whitespace-nowrap drop-shadow-lg">
                 ANIME ROULETTE
             </h1>
-            <p data-i18n="subtitle" class="text-slate-500 text-sm font-bold uppercase tracking-widest mt-1 whitespace-nowrap">
+            <p data-i18n="subtitle" class="text-slate-500 text-xs md:text-sm font-bold uppercase tracking-widest mt-1 whitespace-nowrap">
                 Descubra seu próximo anime
             </p>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 lg:flex lg:flex-wrap gap-4 justify-center items-end">
+        <div class="w-full xl:w-auto flex flex-wrap justify-center gap-3 items-end relative z-10 mt-4 xl:mt-0 xl:mr-40">
             
-            <div class="flex flex-col gap-1">
+            <div class="flex flex-col gap-1 w-full sm:w-auto flex-1 min-w-[160px] max-w-[220px]">
                 <div class="flex items-center gap-1.5 ml-1">
                     <label data-i18n="userLabel" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Usuário</label>
                     <div class="group relative flex items-center">
-                        <span class="material-symbols-outlined text-primary/80 text-[16px] cursor-help hover:text-primary transition-colors">help</span>
-                        <div class="absolute top-full left-0 mt-2 w-64 p-3 bg-[#1e1e2e] border border-white/10 rounded-xl text-[11px] leading-relaxed text-slate-300 shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-all z-50 normal-case tracking-normal transform -translate-y-2 group-hover:translate-y-0">
+                        <span class="material-symbols-outlined text-primary/80 text-[14px] cursor-help">help</span>
+                        <div class="absolute top-full left-0 mt-2 w-64 p-3 bg-[#1e1e2e] border border-white/10 rounded-xl text-[11px] text-slate-300 shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-all z-50 transform -translate-y-2 group-hover:translate-y-0 hidden group-hover:block">
                             <p data-i18n="userHelp" id="user-help-text" class="m-0"></p>
-                            <div class="absolute bottom-full left-1.5 border-4 border-transparent border-b-[#1e1e2e]"></div>
                         </div>
                     </div>
                 </div>
-                <div class="relative">
-                    <input data-i18n="" type="text" id="user-filter" placeholder="Nick AniList"
-                        class="bg-[#16161e] border border-white/10 rounded-xl px-4 py-2 text-base outline-none focus:ring-1 focus:ring-primary w-full md:w-56 h-[42px] placeholder:text-slate-600">
-                </div>
+                <input type="text" id="user-filter" placeholder="Nick AniList"
+                    class="bg-[#16161e] border border-white/10 rounded-xl px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-primary w-full h-[40px] placeholder:text-slate-600 transition-all hover:border-primary/30">
             </div>
 
-            <div class="flex flex-col gap-1">
+            <div class="flex flex-col gap-1 w-1/2 sm:w-auto flex-1 min-w-[110px]">
                 <label data-i18n="sourceLabel" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Origem</label>
-                <select id="source-filter" class="custom-select w-full md:w-56 h-[42px]">
+                <select id="source-filter" class="custom-select w-full h-[40px]">
                     <option value="all" data-i18n="sourceGlobal">Todos</option>
-                    <option value="PLANNING" data-i18n="sourcePlanning">Minha Lista (Planning)</option>
+                    <option value="PLANNING" data-i18n="sourcePlanning">Lista</option>
                 </select>
             </div>
 
-            <div class="flex flex-col gap-1">
+            <div class="flex flex-col gap-1 w-1/2 sm:w-auto flex-1 min-w-[110px]">
                 <label id="label-genre" data-i18n="genreLabel" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Gênero</label>
-                <select id="genre-filter" class="custom-select w-full md:w-44 h-[42px]">
+                <select id="genre-filter" class="custom-select w-full h-[40px]">
                     <option value="" data-i18n="genres.all">Todos</option>
                     <option value="Action" data-i18n="genres.action">Ação</option>
                     <option value="Adventure" data-i18n="genres.adventure">Aventura</option>
@@ -108,7 +109,7 @@
                     <option value="Drama" data-i18n="genres.drama">Drama</option>
                     <option value="Romance" data-i18n="genres.romance">Romance</option>
                     <option value="Fantasy" data-i18n="genres.fantasy">Fantasia</option>
-                    <option value="Sci-Fi" data-i18n="genres.scifi">Ficção Científica</option>
+                    <option value="Sci-Fi" data-i18n="genres.scifi">Sci-Fi</option>
                     <option value="Horror" data-i18n="genres.horror">Terror</option>
                     <option value="Mystery" data-i18n="genres.mystery">Mistério</option>
                     <option value="Slice of Life" data-i18n="genres.slice">Slice of Life</option>
@@ -138,20 +139,21 @@
                 </div>
             </div>
 
-            <div class="flex flex-col gap-1">
+            <div class="flex flex-col gap-1 w-1/2 sm:w-auto flex-1 min-w-[90px]">
                 <label data-i18n="countryLabel" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">País</label>
-                <select id="country-filter" class="custom-select w-44 h-[42px]">
+                <select id="country-filter" class="custom-select w-full h-[40px]">
                     <option value="" data-i18n="countryAll">Todos</option>
-                    <option value="JP" data-i18n="countryJP">Japão (Anime)</option>
-                    <option value="CN" data-i18n="countryCN">China (Donghua)</option>
-                    <option value="KR" data-i18n="countryKR">Coreia (Aeni)</option>
+                    <option value="JP">JP</option>
+                    <option value="CN">CN</option>
+                    <option value="KR">KR</option>
                 </select>
             </div>
 
-            <div class="w-full md:w-auto" >
-                <div class="nsfw-container !m-0 !max-w-none md:!max-w-[280px] gap-4">
-                    <span class="nsfw-text" data-i18n="nsfwFilter">Esconder conteúdo adulto</span>
-                    <label class="switch">
+            <div class="nsfw-container w-full sm:w-auto flex items-center justify-center sm:justify-start h-[40px] border border-white/5 bg-white/5 rounded-xl px-3 mt-2 sm:mt-auto min-w-[130px]">
+                <div class="flex items-center gap-3">
+                    <span class="nsfw-text text-[10px] uppercase font-bold tracking-widest text-slate-400 whitespace-nowrap" data-i18n="nsfwFilter">Adulto</span>
+                    
+                    <label class="switch scale-75">
                         <input type="checkbox" id="nsfw-filter" checked>
                         <span class="slider round"></span>
                     </label>
@@ -160,11 +162,11 @@
         </div>
     </header>
 
-    <main class="w-full max-w-7xl flex-1 flex flex-col lg:flex-row items-center lg:items-center justify-center gap-12 p-6 mb-10 mx-auto">
+    <main class="w-full max-w-7xl flex-1 flex flex-col xl:flex-row items-center justify-center gap-12 p-6 mb-10 mx-auto">
 
         <div class="relative group flex-shrink-0">
-            <div class="absolute inset-0 bg-primary/20 blur-[100px] rounded-full"></div>
-            <div class="relative size-72 sm:size-[450px] glassmorphism rounded-full p-4 sm:p-6 flex items-center justify-center shadow-2xl">
+            <div class="absolute inset-0 bg-primary/20 blur-[100px] rounded-full"></div>          
+            <div class="relative size-64 sm:size-80 md:size-[450px] glassmorphism rounded-full p-4 flex items-center justify-center shadow-2xl shrink-0 transition-all duration-500">
                 <div id="wheel" class="size-full rounded-full border-[6px] border-white/10 roulette-gradient relative shadow-inner transition-transform duration-[4000ms] cubic-bezier(0.15, 0, 0.15, 1)" style="transform: rotate(0deg) translateZ(0);">
                     <div class="absolute inset-0 flex items-center justify-center overflow-hidden rounded-full opacity-10">
                         <div class="absolute w-full h-px bg-white rotate-0"></div>
@@ -182,26 +184,41 @@
         </div>
 
         <div class="w-full lg:max-w-[850px] min-h-[400px] flex items-center">
-            <div id="result-card" class="hidden glassmorphism flex flex-col md:flex-row items-stretch overflow-hidden rounded-3xl border border-white/10 shadow-2xl transition-all duration-700 w-full">
+            <div id="result-card" class="glassmorphism relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl transition-all duration-700 w-full h-[600px] md:h-[400px]">
                 
-                <img id="anime-img-tag" src="" alt="Cover" class="w-full md:w-[300px] h-[350px] md:h-auto object-cover flex-shrink-0">
-
-                <div class="p-6 md:p-10 flex flex-col flex-1 min-w-0 bg-gradient-to-br from-white/[0.02] to-transparent">
-                    <h2 id="anime-title" class="text-xl md:text-3xl font-black text-white mb-4 break-words leading-tight"></h2>
-                    
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1">
-                            <span class="material-symbols-outlined text-xs fill-current">star</span>
-                            <span id="anime-score"></span>
+                <div id="mystery-overlay" class="absolute inset-0 z-50 flex items-center justify-center bg-[#0a0a0c]">
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 via-[#0a0a0c] to-[#0a0a0c]"></div>
+                    <div class="relative z-10 animate-pulse">
+                        <span class="font-black text-[200px] md:text-[250px] leading-none text-transparent bg-clip-text bg-gradient-to-b from-white via-primary/50 to-transparent drop-shadow-[0_0_50px_rgba(139,92,246,0.4)] select-none">
+                            ?
                         </span>
                     </div>
+                </div>
 
-                    <p id="anime-desc" class="custom-scrollbar text-slate-300 text-sm md:text-base leading-relaxed mb-6 overflow-y-auto max-h-[150px] md:max-h-[250px]">
-                    </p>
-                    <button id="anilist-link" class="mt-auto w-full bg-primary hover:bg-[#7c3aed] text-white py-4 rounded-2xl transition-all flex items-center justify-center gap-2 font-bold group shadow-lg shadow-primary/20 active:scale-[0.98]">
-                        <span data-i18n="detailsBtn">Ver Detalhes</span>
-                        <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_outward</span>
-                    </button>
+                <div id="content-layout" class="flex flex-col md:flex-row h-full w-full relative z-0 opacity-0 transition-opacity duration-500">
+                    
+                    <div class="w-full md:w-[300px] h-[300px] md:h-auto flex-shrink-0 bg-black/20 border-b md:border-b-0 md:border-r border-white/10 relative">
+                        <img id="anime-img-tag" src="" alt="Cover" class="w-full h-full object-cover">
+                    </div>
+
+                    <div class="flex flex-col flex-1 min-w-0 bg-gradient-to-br from-white/[0.02] to-transparent p-6 md:p-10 relative overflow-hidden">
+                        
+                        <h2 id="anime-title" class="text-xl md:text-3xl font-black text-white mb-3 md:mb-4 break-words leading-tight line-clamp-2 shrink-0"></h2>
+                        
+                        <div class="flex items-center gap-2 mb-4 shrink-0">
+                            <span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1">
+                                <span class="material-symbols-outlined text-xs fill-current">star</span>
+                                <span id="anime-score"></span>
+                            </span>
+                        </div>
+
+                        <p id="anime-desc" class="custom-scrollbar text-slate-300 text-sm md:text-base leading-relaxed mb-4 overflow-y-auto pr-2 flex-1"></p>
+                        
+                        <button id="anilist-link" class="mt-auto w-full bg-primary hover:bg-[#7c3aed] text-white py-3 md:py-4 rounded-2xl transition-all flex items-center justify-center gap-2 font-bold group shadow-lg shadow-primary/20 active:scale-[0.98] shrink-0">
+                            <span data-i18n="detailsBtn">Ver Detalhes</span>
+                            <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_outward</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

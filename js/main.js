@@ -112,71 +112,94 @@ document.addEventListener('DOMContentLoaded', () => {
         const sMin = document.getElementById('score-min').value;
         const sMax = document.getElementById('score-max').value;
         const genero = document.getElementById('genre-filter').value;
-        resultCard.classList.add('hidden');
+        const mysteryOverlay = document.getElementById('mystery-overlay');
+        const contentLayout = document.getElementById('content-layout');
 
+        if (mysteryOverlay) {
+            mysteryOverlay.classList.remove('opacity-0', 'pointer-events-none');
+        }
+        if (contentLayout) {
+            contentLayout.classList.add('hidden','opacity-0');
+        }
+        
+        if (resultCard) {
+            resultCard.classList.remove('animate-glow', 'border-primary/50');
+            resultCard.classList.add('border-white/10');
+        }
+        
         if (parseInt(sMin) > parseInt(sMax)) {
             window.openModal(t.errorFilterTitle, t.errorFilterMsg);
             return;
         }
 
         const originalContent = spinBtn.innerHTML;
-
         spinBtn.innerHTML = `<span class="material-symbols-outlined animate-spin text-xl">sync</span>`;
         spinBtn.disabled = true;
+
+
+        const imgTag = document.getElementById('anime-img-tag');
+        const infoContent = document.getElementById('anime-info-content');
+        const placeholderIcon = document.getElementById('placeholder-icon');
+        const placeholderText = document.getElementById('placeholder-text');
+
+        if (imgTag) imgTag.classList.add('hidden');
+        if (infoContent) infoContent.classList.add('hidden');
+        if (placeholderIcon) placeholderIcon.classList.remove('hidden');
+        if (placeholderText) placeholderText.classList.remove('hidden');
+
+        wheel.classList.remove('wheel-glow', 'wheel-flash');
+        currentRotation += Math.floor(Math.random() * 360) + 1440;
+        wheel.style.transform = `rotate(${currentRotation}deg)`;
+        
+        somGiro.currentTime = 0;
+        somGiro.play().catch(e => console.warn("Som bloqueado"));
 
         const anime = await buscarAnime(genero, sMin, sMax);
 
         if (anime === "USER_ERROR" || !anime) {
             spinBtn.innerHTML = originalContent;
             spinBtn.disabled = false;
+            somGiro.pause();
             return;
         }
-
-        wheel.classList.remove('wheel-glow', 'wheel-flash');
 
         const imgPreloader = new Image();
         imgPreloader.src = anime.coverImage.extraLarge;
 
-
-        imgPreloader.onload = () => {
-            somGiro.currentTime = 0;
-            somGiro.play().catch(e => console.warn("Som bloqueado: requer interação."));
-
-            currentRotation += Math.floor(Math.random() * 360) + 1440;
-            wheel.style.transform = `rotate(${currentRotation}deg)`;
+        const finalizarSorteio = () => {
+            somGiro.pause();
+            wheel.classList.add('wheel-glow', 'wheel-flash');
             
+            atualizarInterface(anime); 
+            salvarNoHistorico(anime);
+            
+            if (typeof confetti === 'function') {
+                const cores = ['#8b5cf6', '#a78bfa', '#00b894', '#fd79a8', '#0984e3', '#fdcb6e'];
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: cores });
+            }
 
-            resultCard.classList.add('opacity-0', 'translate-y-10');
+            spinBtn.innerHTML = originalContent;
+            spinBtn.disabled = false;
+            setTimeout(() => wheel.classList.remove('wheel-flash'), 500);
 
-            setTimeout(() => {
-                somGiro.pause();
-                wheel.classList.add('wheel-glow', 'wheel-flash');
-                
-                atualizarInterface(anime);
-                salvarNoHistorico(anime);
-                
-                if (typeof confetti === 'function') {
-                    const cores = ['#8b5cf6', '#a78bfa', '#00b894', '#fd79a8', '#0984e3', '#fdcb6e'];
-                    const duration = 3000;
-                    const end = Date.now() + duration;
-                    (function frame() {
-                        confetti({ particleCount: 6, angle: 60, spread: 55, origin: { x: 0 }, colors: cores });
-                        confetti({ particleCount: 6, angle: 120, spread: 55, origin: { x: 1 }, colors: cores });
-                        if (Date.now() < end) requestAnimationFrame(frame);
-                    }());
+            if (window.innerWidth < 1024) {
+                const resultCard = document.getElementById('result-card');
+                if (resultCard) {
+                    setTimeout(() => {
+                        resultCard.scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }, 100);
                 }
-
-                spinBtn.innerHTML = originalContent;
-                spinBtn.disabled = false;
-                setTimeout(() => wheel.classList.remove('wheel-flash'), 500);
-            }, 4000);
+            }
         };
 
         imgPreloader.onerror = () => {
-            console.error("Erro ao carregar imagem do anime.");
             spinBtn.innerHTML = originalContent;
             spinBtn.disabled = false;
         };
+        setTimeout(finalizarSorteio, 4000);
     });
 
     document.getElementById('clear-history').addEventListener('click', () => {

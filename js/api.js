@@ -253,9 +253,33 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
 export function atualizarInterface(anime) {
     if (!anime) return;
     
+    const resultCard = document.getElementById('result-card');
     const imgTag = document.getElementById('anime-img-tag');
+    const infoContent = document.getElementById('anime-info-content');
+    const placeholderIcon = document.getElementById('placeholder-icon');
+    const placeholderText = document.getElementById('placeholder-text');
+    const mysteryOverlay = document.getElementById('mystery-overlay');
+    const contentLayout = document.getElementById('content-layout');
+
+
+    if (placeholderIcon) placeholderIcon.classList.add('hidden');
+    if (placeholderText) placeholderText.classList.add('hidden');
+    if (imgTag) imgTag.classList.remove('hidden');
+    if (infoContent) infoContent.classList.remove('hidden');
+
     if (imgTag && anime.coverImage) {
         imgTag.src = anime.coverImage.extraLarge || anime.coverImage.large;
+    }
+
+    if (mysteryOverlay) {   
+        mysteryOverlay.classList.add('opacity-0', 'pointer-events-none'); 
+    }
+
+    if (contentLayout) {
+        contentLayout.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            contentLayout.classList.remove('opacity-0');
+        });
     }
 
     document.getElementById('anime-title').innerText = anime.title.romaji;
@@ -266,24 +290,26 @@ export function atualizarInterface(anime) {
     desc.scrollTop = 0;
     
     const detailsBtn = document.getElementById('anilist-link');
-    
     detailsBtn.classList.add('animate-pulse-purple');
     detailsBtn.onclick = () => {
         detailsBtn.classList.remove('animate-pulse-purple');
         window.open(anime.siteUrl, '_blank');
     };
 
-    const resultCard = document.getElementById('result-card');
-    
-    resultCard.style.display = 'flex';
-    resultCard.classList.remove('hidden');
-    
-    resultCard.classList.add('opacity-0', 'translate-y-10');
+    resultCard.classList.remove('opacity-100', 'translate-y-0', 'animate-glow', 'border-primary/50', 'shadow-primary/20');
+    resultCard.classList.add('opacity-0', 'translate-y-4', 'border-white/10');
 
     requestAnimationFrame(() => {
         setTimeout(() => {
-            resultCard.classList.remove('opacity-0', 'translate-y-10');
-            resultCard.classList.add('opacity-100', 'translate-y-0', 'animate-glow');
-        }, 10);
+            resultCard.classList.remove('opacity-0', 'translate-y-4', 'border-white/10');
+            
+            resultCard.classList.add(
+                'opacity-100',
+                'translate-y-0',
+                'animate-glow',
+                'border-primary/50',
+                'shadow-2xl'
+            );
+        }, 50);
     });
 }
