@@ -1,11 +1,16 @@
-const url = 'https://graphql.anilist.co';
 import { translations } from './languages.js';
+import { AnimeDatabase } from './db.js';
 
-const CACHE_EXPIRATION_MS = 10 * 60 * 1000;
+const db = new AnimeDatabase();
+const url = 'https://graphql.anilist.co';
+
+
 const GLOBAL_CACHE_KEY = 'cache_busca_global';
+const CACHE_DURATION = 1000 * 60 * 60 * 12;
+
 
 async function obterDadosUsuarioIndividual(nome) {
-    const query =`query ($userName: String) {
+    const query = `query ($userName: String) {
         MediaListCollection(userName: $userName, type: ANIME) {
             lists {
                 status
@@ -50,30 +55,49 @@ async function obterDadosUsuarioIndividual(nome) {
 async function obterListasMultiplosUsuarios(inputNomes) {
     const lang = localStorage.getItem('preferred_lang') || 'pt';
     const t = translations[lang];
+
     const nomes = inputNomes.split(',').map(n => n.trim()).filter(n => n !== "");
     
-    const cacheKey = `cache_listas_${nomes.join('_').toLowerCase()}`;
-
-    const cachedData = localStorage.getItem(cacheKey);
-    if (cachedData) {
-        const { timestamp, data } = JSON.parse(cachedData);
-        if (Date.now() - timestamp < CACHE_EXPIRATION_MS) {
-            return data;
-        }
-    }
-
     let planningCombinado = [];
     let todosCombinados = [];
 
     for (const nome of nomes) {
-        const dados = await obterDadosUsuarioIndividual(nome);
-        if (!dados) {
-            window.openModal(t.errorUserTitle, `${t.errorUserMsg} (${nome})`);
-            return null;
+        let dadosUsuario = null;
+        let usarCache = false;
+
+        try {
+            const cache = await db.getUserLists(nome);
+            if (cache) {
+                const idadeCache = Date.now() - cache.timestamp;
+                if (idadeCache < CACHE_DURATION) {
+                    dadosUsuario = { planning: cache.planning, todos: cache.completed }; 
+                    usarCache = true;
+                } else {
+                    console.log(`⌛ [Cache] Lista de ${nome} expirou. Atualizando...`);
+                }
+            }
+        } catch (e) {
+            console.warn("Erro ao ler cache IDB:", e);
         }
-        planningCombinado = [...planningCombinado, ...dados.planning];
-        todosCombinados = [...todosCombinados, ...dados.todos];
+
+
+        if (!usarCache) {
+            console.log(`🌐 [API] Baixando lista fresca de: ${nome}...`);
+            dadosUsuario = await obterDadosUsuarioIndividual(nome);
+
+            if (!dadosUsuario) {
+                window.openModal(t.errorUserTitle, `${t.errorUserMsg} (${nome})`);
+                return null;
+            }
+
+            db.saveUserLists(nome, dadosUsuario.planning, dadosUsuario.todos);
+        }
+
+
+        planningCombinado = [...planningCombinado, ...dadosUsuario.planning];
+        todosCombinados = [...todosCombinados, ...dadosUsuario.todos];
     }
+
 
     const removerDuplicados = (arr) => {
         const uniqueIds = new Set();
@@ -84,24 +108,12 @@ async function obterListasMultiplosUsuarios(inputNomes) {
         });
     };
 
-    const resultadoFinal = { 
+    return { 
         planning: removerDuplicados(planningCombinado), 
         todos: removerDuplicados(todosCombinados) 
     };
-
-    try {
-        localStorage.setItem(cacheKey, JSON.stringify({
-            timestamp: Date.now(),
-            data: resultadoFinal
-        }));
-    } catch (e) {
-        Object.keys(localStorage)
-            .filter(key => key.startsWith('cache_listas_'))
-            .forEach(key => localStorage.removeItem(key));
-    }
-
-    return resultadoFinal;
 }
+
 
 export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
     const lang = localStorage.getItem('preferred_lang') || 'pt';
@@ -116,6 +128,7 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
         return null;
     }
 
+
     if (usuarioInput === "") {
         const cachedGlobal = localStorage.getItem(GLOBAL_CACHE_KEY);
         if (cachedGlobal) {
@@ -126,6 +139,7 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
                 filters.max === scoreMax && 
                 filters.nsfw === esconderAdulto && 
                 filters.country === paisAtual;
+
 
             if (mesmosFiltros && (Date.now() - timestamp < 5 * 60 * 1000)) {
                 return data[Math.floor(Math.random() * data.length)];
@@ -153,8 +167,10 @@ export async function buscarAnime(genero, scoreMin, scoreMax, tentativas = 0) {
                 return "USER_ERROR";
             }
             
+
             includeIds = planningFiltrado.sort(() => 0.5 - Math.random()).slice(0, 50);
         } else {
+
             const idsParaIgnorarNoServidor = listas.todos
                 .filter(item => !paisAtual || item.country === paisAtual)
                 .map(item => item.id)
@@ -261,7 +277,6 @@ export function atualizarInterface(anime) {
     const mysteryOverlay = document.getElementById('mystery-overlay');
     const contentLayout = document.getElementById('content-layout');
 
-
     if (placeholderIcon) placeholderIcon.classList.add('hidden');
     if (placeholderText) placeholderText.classList.add('hidden');
     if (imgTag) imgTag.classList.remove('hidden');
@@ -282,7 +297,7 @@ export function atualizarInterface(anime) {
         });
     }
 
-    document.getElementById('anime-title').innerText = anime.title.romaji;
+    document.getElementById('anime-title').innerText = anime.title.romaji || anime.title.english || anime.title.native;
     document.getElementById('anime-score').innerText = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : "0.0";
     
     const desc = document.getElementById('anime-desc');
@@ -295,6 +310,7 @@ export function atualizarInterface(anime) {
         detailsBtn.classList.remove('animate-pulse-purple');
         window.open(anime.siteUrl, '_blank');
     };
+
 
     resultCard.classList.remove('opacity-100', 'translate-y-0', 'animate-glow', 'border-primary/50', 'shadow-primary/20');
     resultCard.classList.add('opacity-0', 'translate-y-4', 'border-white/10');

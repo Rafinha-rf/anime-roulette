@@ -1,10 +1,21 @@
 import { buscarAnime, atualizarInterface } from './api.js';
 import { translations } from './languages.js';
+import { AnimeDatabase } from './db.js';
 
+const db = new AnimeDatabase();
 
-const somGiro = new Audio('./assets/sounds/roulette-sound.mp3');
-somGiro.loop = true;
-somGiro.volume = 0.2;
+const sonsDeGiro = [
+    './assets/sounds/roulette-sound.mp3', 
+    './assets/sounds/aekasinao.mp3',
+    './assets/sounds/explosion.mp3',
+    './assets/sounds/hachimi.mp3',
+]
+const somRevelaCard = new Audio('./assets/sounds/sound-revela-card.mp3');
+somRevelaCard.loop = false;
+somRevelaCard.volume = 0.2;
+
+let audioAtualGiro = null;
+
 
 window.setLanguage = function(lang) {
     localStorage.setItem('preferred_lang', lang);
@@ -45,7 +56,7 @@ function applyLanguage(lang) {
 document.addEventListener('DOMContentLoaded', () => {
     const savedLang = localStorage.getItem('preferred_lang') || 'pt';
     applyLanguage(savedLang);
-    renderizarHistorico();
+    renderizarHistorico(); 
 
     const muteBtn = document.getElementById('mute-btn');
     const muteIcon = document.getElementById('mute-icon');
@@ -53,13 +64,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let isMuted = localStorage.getItem('audio_muted') === 'true';
 
     function atualizarEstadoAudio() {
-    somGiro.muted = isMuted;
-    if (muteIcon) {
-        muteIcon.innerText = isMuted ? 'volume_off' : 'volume_up';
-        muteIcon.className = `material-symbols-outlined transition-colors ${isMuted ? 'text-slate-500' : 'text-primary'}`;
-    }
-    if (muteBtn) {
-        muteBtn.style.borderColor = isMuted ? 'rgba(255,255,255,0.1)' : 'rgba(139,92,246,0.5)';
+        if (audioAtualGiro) {
+            audioAtualGiro.muted = isMuted;
+        }
+        somRevelaCard.muted = isMuted
+        if (muteIcon) {
+            muteIcon.innerText = isMuted ? 'volume_off' : 'volume_up';
+            muteIcon.className = `material-symbols-outlined transition-colors ${isMuted ? 'text-slate-500' : 'text-primary'}`;
+        }
+        if (muteBtn) {
+            muteBtn.style.borderColor = isMuted ? 'rgba(255,255,255,0.1)' : 'rgba(139,92,246,0.5)';
         }
     }
     
@@ -151,15 +165,28 @@ document.addEventListener('DOMContentLoaded', () => {
         currentRotation += Math.floor(Math.random() * 360) + 1440;
         wheel.style.transform = `rotate(${currentRotation}deg)`;
         
-        somGiro.currentTime = 0;
-        somGiro.play().catch(e => console.warn("Som bloqueado"));
+        const somSorteado = sonsDeGiro[Math.floor(Math.random() * sonsDeGiro.length)];
+        
+        if (audioAtualGiro) {
+            audioAtualGiro.pause();
+            audioAtualGiro.currentTime = 0;
+        }
+        audioAtualGiro = new Audio(somSorteado);
+
+        audioAtualGiro.loop = true;
+        audioAtualGiro.volume = 0.2;
+
+        let isMuted = localStorage.getItem('audio_muted') === 'true';
+        audioAtualGiro.muted = isMuted;
+
+        audioAtualGiro.play().catch(e => console.warn("Som bloqueado"));
 
         const anime = await buscarAnime(genero, sMin, sMax);
 
         if (anime === "USER_ERROR" || !anime) {
             spinBtn.innerHTML = originalContent;
             spinBtn.disabled = false;
-            somGiro.pause();
+            audioAtualGiro.pause();
             return;
         }
 
@@ -167,12 +194,17 @@ document.addEventListener('DOMContentLoaded', () => {
         imgPreloader.src = anime.coverImage.extraLarge;
 
         const finalizarSorteio = () => {
-            somGiro.pause();
+            if (audioAtualGiro) {
+                audioAtualGiro.pause();
+                audioAtualGiro.currentTime = 0;
+            }   
+            somRevelaCard.currentTime = 0;
+            somRevelaCard.play().catch(e => console.warn("Som bloqueado"));
             wheel.classList.add('wheel-glow', 'wheel-flash');
             
             atualizarInterface(anime); 
             salvarNoHistorico(anime);
-            
+
             if (typeof confetti === 'function') {
                 const cores = ['#8b5cf6', '#a78bfa', '#00b894', '#fd79a8', '#0984e3', '#fdcb6e'];
                 confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: cores });
@@ -201,39 +233,48 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         setTimeout(finalizarSorteio, 4000);
     });
+    
 
-    document.getElementById('clear-history').addEventListener('click', () => {
-        localStorage.removeItem('anime_history');
+    document.getElementById('clear-history').addEventListener('click', async () => {
+        await db.clearHistory();
         renderizarHistorico();
     });
 });
 
-function renderizarHistorico() {
-    const container = document.getElementById('history-list');
-    const historico = JSON.parse(localStorage.getItem('anime_history')) || [];
-    const t = translations[localStorage.getItem('preferred_lang') || 'pt'];
 
-    if (historico.length === 0) {
-        container.innerHTML = `<p class="text-slate-600 italic text-sm col-span-full">${t.noHistory}</p>`;
-        return;
+async function renderizarHistorico() {
+    const container = document.getElementById('history-list');
+    const t = translations[localStorage.getItem('preferred_lang') || 'pt'];
+    
+    try {
+        const historico = await db.getAllHistory();
+
+        if (historico.length === 0) {
+            container.innerHTML = `<p class="text-slate-600 italic text-sm col-span-full">${t.noHistory}</p>`;
+            return;
+        }
+
+        container.innerHTML = historico.map(anime => `
+            <a href="${anime.url}" target="_blank" class="group relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/5 bg-[#16161e] hover:border-primary/50 transition-all shadow-2xl">
+                <img src="${anime.cover}" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity">
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
+                <div class="absolute top-3 right-3 bg-primary/85 text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg">
+                    <span class="material-symbols-outlined text-xs fill-current">star</span> ${anime.score}
+                </div>
+                <div class="absolute bottom-4 left-4 right-4">
+                    <p class="text-xs sm:text-sm text-white font-black uppercase leading-tight line-clamp-2">${anime.title}</p>
+                </div>
+            </a>`).join('');
+    } catch (e) {
+        console.error("Erro ao renderizar histórico:", e);
     }
-    container.innerHTML = historico.map(anime => `
-        <a href="${anime.url}" target="_blank" class="group relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/5 bg-[#16161e] hover:border-primary/50 transition-all shadow-2xl">
-            <img src="${anime.cover}" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity">
-            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-            <div class="absolute top-3 right-3 bg-primary/85 text-white px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg">
-                <span class="material-symbols-outlined text-xs fill-current">star</span> ${anime.score}
-            </div>
-            <div class="absolute bottom-4 left-4 right-4">
-                <p class="text-xs sm:text-sm text-white font-black uppercase leading-tight line-clamp-2">${anime.title}</p>
-            </div>
-        </a>`).join('');
 }
 
-function salvarNoHistorico(anime) {
-    let historico = JSON.parse(localStorage.getItem('anime_history')) || [];
-    const novoItem = { id: anime.id, title: anime.title.romaji, cover: anime.coverImage.large, url: anime.siteUrl, score: (anime.averageScore / 10).toFixed(1) };
-    historico = [novoItem, ...historico.filter(item => item.id !== anime.id)].slice(0, 5);
-    localStorage.setItem('anime_history', JSON.stringify(historico));
-    renderizarHistorico();
+async function salvarNoHistorico(anime) {
+    try {
+        await db.saveHistory(anime);
+        renderizarHistorico();
+    } catch (e) {
+        console.error("Erro ao salvar no histórico:", e);
+    }
 }
