@@ -8,7 +8,7 @@ const sonsDeGiro = [
     './assets/sounds/roulette-sound.mp3', 
     './assets/sounds/aekasinao.mp3',
     './assets/sounds/explosion.mp3',
-    './assets/sounds/hachimi.mp3',
+    './assets/sounds/hachimi.mp3',  
 ]
 const somRevelaCard = new Audio('./assets/sounds/sound-revela-card.mp3');
 somRevelaCard.loop = false;
