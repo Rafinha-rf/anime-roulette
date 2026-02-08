@@ -29,6 +29,9 @@ export const translations = {
         countryLabel: "País",
         countryAll: "Todos",
         errorNotFoundMsg: "Não encontramos nada com esses filtros. Se estiver buscando China ou Coreia, tente remover o gênero ou baixar a nota mínima!",
+        tooltipTitle: "COMO FUNCIONA:",
+        tooltipGlobalDesc: "Sorteia qualquer anime do AniList.",
+        tooltipPlanningDesc: "Sorteia apenas animes da sua lista (Planning).",
         genres: {
             all: "Todos",
             action: "Ação",
@@ -75,6 +78,9 @@ export const translations = {
         countryLabel: "Country",
         countryAll: "All",
         errorNotFoundMsg: "No results found with these filters. If searching for China or Korea, try removing the genre or lowering the minimum score!",
+        tooltipTitle: "HOW IT WORKS:",
+        tooltipGlobalDesc: "Random anime from full AniList database.",
+        tooltipPlanningDesc: "Random anime from your Planning list only.",
         genres: {
             all: "All",
             action: "Action",
